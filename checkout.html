@@ -4,21 +4,22 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contact Seller</title>
+    <title>Contact the seller | UnivBid</title>
     <link rel="stylesheet" href="Styles/main.css">
     <link rel="stylesheet" href="Styles/checkout.css">
+    <link rel="stylesheet" href="Styles/portfolio.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 
 <body>
 
     <nav class="main-header-nav">
-        <img src="../Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
+        <img src="Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
         <div class="link-navbar">
             <a href="index.html" aria-label="Home UnivBid">Home</a>
-            <a href="career.html" aria-label="Career Opportunities">Career</a>
-            <a href="#" aria-label="Blg">Blog</a>
-            <a href="#about" aria-label="About UnivBid">About</a>
+            <a href="career.html" aria-label="About the project">Our story</a>
+            <a href="sales_page.html" aria-label="Browse auctions">Browse</a>
+            <a href="index.html#about" aria-label="About UnivBid">About</a>
             <a href="contact.html" aria-label="Contact Us">Contact</a>
         </div>
     </nav>
@@ -46,8 +47,10 @@
             <label for="message">Message</label>
             <textarea id="message" rows="4" required placeholder="Write your message here..."></textarea>
 
-            <button type="submit">Send Inquiry</button>
+            <button type="submit">Preview inquiry</button>
         </form>
+        <p class="demo-note">Inquiry sending is not connected in this demo yet. To reach the project team, use the
+            <a href="contact.html">contact form</a>.</p>
 
 
 
@@ -61,7 +64,7 @@
     </div>
 
 </body>
-<script src="scripts/pages/checkout.js"></script>
+<script type="module" src="Scripts/pages/checkout.js"></script>
 <script type="module" src="firebase.js" defer></script>
 
 </html>

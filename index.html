@@ -4,9 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UnivBid</title>
+    <meta name="description" content="Discover and share campus essentials with UnivBid, a student-focused marketplace concept.">
+    <meta name="theme-color" content="#202020">
+    <title>UnivBid | Student Auction Marketplace</title>
     <link rel="stylesheet" href="Styles/main.css">
     <link rel="stylesheet" href="Styles/style_home_page.css">
+    <link rel="stylesheet" href="Styles/portfolio.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
@@ -14,21 +17,21 @@
 <body>
 
     <nav class="main-header-nav">
-        <img src="../Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
+        <img src="Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
            <div class="search_bar">
-            <input type="text" name="search_input" placeholder="Search Auctions ..." />
-            <button id="search_btn">
+           <input type="search" name="search_input" placeholder="Search sample listings" aria-label="Search sample listings">
+           <button id="search_btn" type="button" aria-label="Search listings">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </button>
         </div>
         
         <div class="link-navbar">
             <a href="index.html" aria-label="Home UnivBid">Home</a>
-            <a href="career.html" aria-label="Career Opportunities">Career</a>
+            <a href="career.html" aria-label="About the project">Our story</a>
             <a href="#about" aria-label="About UnivBid">About</a>
             <a href="contact.html" aria-label="Contact Us">Contact</a>
-            <button class="register_btn"> </button>
-            <button class="login_btn"> </button>
+            <button class="register_btn">Sign Up</button>
+            <button class="login_btn">Sign In</button>
         </div>
     </nav>
 
@@ -36,15 +39,15 @@
         <div class="main_section">
             <div class="content_left">
                 <div class="text_content">
-                    <h1>The Ultimate Student Auction Platform</h1>
-                    <p>Buy and sell everything you need for university life. From textbooks to tech gadgets, find
-                        amazing deals and make some extra cash with our secure auction platform.</p>
+                    <h1>The student marketplace, built for campus life.</h1>
+                    <p>Discover useful finds, pass along things you no longer need, and make campus exchanges feel
+                        a little more local.</p>
 
                 </div>
 
                 <div class="CTA-block">
-                    <button class="cta_bidding"> Start Bidding → </button>
-                    <button class="cta_browse"> Browse Auction</button>
+                    <button class="cta_signup">Create an account</button>
+                    <button class="cta_browse">Browse listings</button>
                 </div>
 
                 <div class="features-grid">
@@ -60,8 +63,8 @@
                         </div>
 
                         <div class="feature_detail">
-                            <h3>Real-time Bidding</h3>
-                            <p>Live updates</p>
+                            <h3>Campus finds</h3>
+                            <p>Discover useful essentials</p>
                         </div>
                     </div>
 
@@ -76,8 +79,8 @@
                         </div>
 
                         <div class="feature_detail">
-                            <h3>Secure Payments</h3>
-                            <p>Protected transactions</p>
+                            <h3>Student listings</h3>
+                            <p>Buy and sell in one place</p>
                         </div>
                     </div>
 
@@ -92,8 +95,8 @@
                         </div>
 
                         <div class="feature_detail">
-                            <h3>24/7 Available</h3>
-                            <p> Always accessible</p>
+                            <h3>Easy to explore</h3>
+                            <p>Browse at your own pace</p>
                         </div>
                     </div>
 
@@ -110,9 +113,38 @@
 
         <section id="details_feature">
             <div class="featured_products">
-                   <h1>Featured Products</h1>
-                   <p>Discover amazing deals on everything you need for university life</p>
-
+                <h1>Marketplace preview</h1>
+                <p>Sample listings show how students can discover useful finds around campus.</p>
+                <div class="featured-grid" aria-label="Sample marketplace listings">
+                    <article class="featured-card">
+                        <img src="Images/4.jpg" alt="Sample listing preview">
+                        <div class="featured-card-content">
+                            <span class="eyebrow">Sample listing</span>
+                            <h3>Study space essentials</h3>
+                            <p>A useful find for your next semester.</p>
+                            <span class="price">€18.00</span>
+                        </div>
+                    </article>
+                    <article class="featured-card">
+                        <img src="Images/9.webp" alt="Sample listing preview">
+                        <div class="featured-card-content">
+                            <span class="eyebrow">Sample listing</span>
+                            <h3>Everyday tech</h3>
+                            <p>Give quality pre-loved gear a second life.</p>
+                            <span class="price">€32.00</span>
+                        </div>
+                    </article>
+                    <article class="featured-card">
+                        <img src="Images/13.png" alt="Sample listing preview">
+                        <div class="featured-card-content">
+                            <span class="eyebrow">Sample listing</span>
+                            <h3>Campus picks</h3>
+                            <p>Browse useful finds from your student community.</p>
+                            <span class="price">€12.00</span>
+                        </div>
+                    </article>
+                </div>
+                <p class="search-results-status" aria-live="polite" hidden></p>
             </div>
             <div class="features_block">
                 <h1>How <b>UnivBid</b> Works</h1>
@@ -124,7 +156,7 @@
                         <i style="background:rgb(197, 198, 244); padding: 24px; border-radius: 5px; font-size: 20px ; display:flex ; align-items:center; justify-content:center"
                             class="fa-solid fa-user-plus icon"></i>
                         <p id="par">Sign Up</p>
-                        <small> Create Account with your University Account</small>
+                        <small>Create an account to join your campus community</small>
 
                     </div>
                     <hr style="border: 1px solid white;">
@@ -133,24 +165,24 @@
                         <i style="background:rgb(197, 244, 235); padding: 24px; border-radius: 5px; font-size: 20px ; display:flex ; align-items:center; justify-content:center"
                             class="fa-solid fa-plus icon"></i>
                         <p id="par">List or Browse</p>
-                        <small> Create auctions or browse existing auctions</small>
+                        <small>Create a listing or browse what's available</small>
                     </div>
                     <hr style="border: 1px solid white;">
 
 
                     <div class="box_el">
                         <i style="background:rgb(244, 214, 197); padding: 24px; border-radius: 5px; font-size: 20px ; display:flex ; align-items:center; justify-content:center"
-                            class="fa-solid fa-gavel icon"></i>
-                        <p id="par">Bid & Win</p>
-                        <small> Place bids and watch in real time</small>
+                            class="fa-solid fa-comments icon"></i>
+                        <p id="par">Connect locally</p>
+                        <small>Find something useful from another student</small>
                     </div>
                    <hr style="border: 1px solid white;">
 
                     <div class="box_el">
                         <i style="background:rgb(238, 197, 244); padding: 24px; border-radius: 5px; font-size: 20px ; display:flex ; align-items:center; justify-content:center"
-                            class="fa-regular fa-credit-card icon"></i>
-                        <p id="par">Secure Payment</p>
-                        <small> Comple transcation safely</small>
+                            class="fa-solid fa-handshake icon"></i>
+                        <p id="par">Complete the exchange</p>
+                        <small>Arrange your next steps directly</small>
                     </div>
 
                 </div>
@@ -163,13 +195,12 @@
                 <div class="text_content">
                     <h2>Platform Features</h2>
                     <ul>
-                        <li><i class="fa fa-check"></i> List your items for auction with just a few clicks.</li>
-                        <li><i class="fa fa-check"></i> Place bids on items securely and in real-time.</li>
-                        <li><i class="fa fa-check"></i> Manage and monitor your auctions through a user-friendly
+                        <li><i class="fa fa-check"></i> Create a listing in just a few clicks.</li>
+                        <li><i class="fa fa-check"></i> Discover listings shared by other students.</li>
+                        <li><i class="fa fa-check"></i> Manage your listings through a straightforward
                             dashboard.
                         </li>
-                        <li><i class="fa fa-check"></i> All auctions are powered by Firebase for secure and real-time
-                            updates.</li>
+                        <li><i class="fa fa-check"></i> Firebase provides the app's authentication and listing data.</li>
                         <li><i class="fa fa-check"></i> A clean, responsive interface built using HTML, CSS, and
                             JavaScript.
                         </li>
@@ -179,9 +210,8 @@
 
             <div class="get_started">
                 <h2>Get Started with UnivBid</h2>
-                <p>Ready to join the UnivBid community? Signing up is easy, and you're just a few clicks away from
-                    creating
-                    your first auction or placing your first bid!</p>
+                <p>Ready to join the UnivBid community? Create an account to start exploring listings or share an item
+                    of your own.</p>
                 <button class="sign_up_btn" onclick="window.location.href='sign_up.html'">Sign up Now</button>
             </div>
 
@@ -195,26 +225,17 @@
 
                 <div class="footer_top">
                     <div class="footer_brand">
-                        <img src="../Images/logo-transparent_.png" alt="UnivBid Logo" width="100px">
-                        <p>The ultimate auction platform desigmed specifically for univeristy students. Buy, sell, and
-                            discover amazing deals within your campus community.</p>
-                        <ul class="f-menu">
-                            <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                            <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                            <li><a href="#"><i class="fab fa-google-plus-g"></i></a></li>
-                            <li><a href="#"><i class="fab fa-youtube"></i></a></li>
-                            <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
-                        </ul>
+                        <img src="Images/logo-transparent_.png" alt="UnivBid Logo" width="100px">
+                        <p>A student-focused marketplace concept for discovering and sharing campus essentials.</p>
                     </div>
 
                     <div class="quick_link">
                         <h3>Quick Links</h3>
                         <ul>
-                            <li><a href="sales_page.html">Browse Auctions</a></li>
-                            <li><a href="create_auction.html">Create Auction</a></li>
-                            <li><a href="index.html">How It Works</a></li>
-                            <li><a href="#">Categories</a></li>
-                            <li><a href="#">Popular Items</a></li>
+                            <li><a href="sales_page.html">Browse listings</a></li>
+                            <li><a href="create_auction.html">Create a listing</a></li>
+                            <li><a href="index.html#details_feature">How It Works</a></li>
+                            <li><a href="index.html#about">About the project</a></li>
                         </ul>
                     </div>
 
@@ -222,10 +243,8 @@
                     <div class="support">
                         <h3>Support</h3>
                         <ul>
-                            <li><a href="#">Help Center</a></li>
-                            <li><a href="#">Saftey Guidelines</a></li>
-                            <li><a href="#">Report an Issue</a></li>
-                            <li><a href="#">FAQs</a></li>
+                            <li><a href="contact.html">Contact</a></li>
+                            <li><a href="career.html">About the project</a></li>
                         </ul>
                     </div>
 
@@ -233,9 +252,8 @@
                     <div class="contact_us">
                         <h3>Contact Us</h3>
                         <ul>
-                            <li>Email: univbid.contact@gmail.com</li>
-                            <li>Phone: +123 456 7890</li>
-                            <li>Address: Bremen, Germany</li>
+                            <li><a href="mailto:univbid.contact@gmail.com">univbid.contact@gmail.com</a></li>
+                            <li><a href="contact.html">Contact form</a></li>
                         </ul>
                     </div>
                 </div>
@@ -243,11 +261,9 @@
                 <hr>
 
                 <div class="footer_bottom">
-                    <p>&copy; 2025 UnivBid | All rights reserved</p>
+                    <p>&copy; 2026 UnivBid | Student marketplace concept</p>
                     <div class="policies">
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Terms of Service</a>
-                        <a href="#">Cookie Policy</a>
+                        <a href="contact.html">Contact UnivBid</a>
                     </div>
                 </div>
 

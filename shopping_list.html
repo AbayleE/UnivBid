@@ -1,20 +1,24 @@
-<meta charset="UTF-8" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shopping Cart</title>
+  <title>Your cart | UnivBid</title>
   <link rel="stylesheet" href="Styles/main.css">
   <link rel="stylesheet" href="Styles/cart.css">
+  <link rel="stylesheet" href="Styles/portfolio.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   </head>
 
   <body>
 
       <nav class="main-header-nav">
-        <img src="../Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
+        <img src="Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
         <div class="link-navbar">
-            <a href="#" aria-label="Home UnivBid">Home</a>
-            <a href="career.html" aria-label="Career Opportunities">Career</a>
-            <a href="#" aria-label="Blg">Blog</a>
-            <a href="#about" aria-label="About UnivBid">About</a>
+            <a href="index.html" aria-label="Home UnivBid">Home</a>
+            <a href="career.html" aria-label="About the project">Our story</a>
+            <a href="sales_page.html" aria-label="Browse auctions">Browse</a>
+            <a href="index.html#about" aria-label="About UnivBid">About</a>
             <a href="contact.html" aria-label="Contact Us">Contact</a>
         </div>
     </nav>
@@ -33,7 +37,6 @@
       document.addEventListener("DOMContentLoaded", () => {
         const card_container = document.getElementById("card_container");
         let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        console.log(cart);
   
         function renderCart() {
           card_container.innerHTML = "";
@@ -54,7 +57,7 @@
             name.innerText = product.name;
   
             const price = document.createElement("p");
-            price.innerText = `Price: €${product.price}`;
+            price.innerText = `Price: €${Number(product.price).toFixed(2)}`;
   
             const quantity = document.createElement("p");
             quantity.innerText = `Quantity: ${product.quantity}`;

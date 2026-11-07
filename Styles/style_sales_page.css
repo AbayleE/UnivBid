@@ -16,3 +16,7 @@
 
 
 
+.load_more_btn {
+    display: block;
+    margin: var(--gap-base, 20px) auto;
+}

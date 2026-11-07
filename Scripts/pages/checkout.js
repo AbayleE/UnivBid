@@ -1,22 +1,35 @@
-//import { createCheckoutSession } from '../services/payments.js';
+import { showNotification } from '../services/notifications.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const product = JSON.parse(sessionStorage.getItem('buy_now_item'));
-    const parsedProduct = JSON.parse(product.product);
-    console.log(parsedProduct);
+    const storedProduct = sessionStorage.getItem('buy_now_item');
+    if (!storedProduct) {
+        window.location.replace('sales_page.html');
+        return;
+    }
 
-    document.getElementById('pname').innerHTML = `<strong>${parsedProduct.name}</strong>`;
-    document.getElementById('pprice').innerHTML = `€ ${product.total_price}`;
-    document.getElementById('pcond').innerHTML = `<i>Condition: ${parsedProduct.condition}</i>`;
-    document.getElementById('pimg').src = parsedProduct.image;
+    try {
+        const checkout = JSON.parse(storedProduct);
+        const product = JSON.parse(checkout.product);
+        const name = document.getElementById('pname');
+        const price = document.getElementById('pprice');
+        const condition = document.getElementById('pcond');
+        const image = document.getElementById('pimg');
 
-     const checkoutData = {
-            title: parsedProduct.name,
-            description: parsedProduct.description || '',
-            price: product.total_price,
-        };
+        name.textContent = product.name || 'Selected item';
+        price.textContent = `€ ${checkout.total_price}`;
+        condition.textContent = `Condition: ${product.condition || 'Not specified'}`;
+        image.src = product.image?.trim() || 'Images/13.png';
+        image.alt = product.name ? `Preview of ${product.name}` : 'Product preview';
 
-
-    new createCheckoutSession(checkoutData);
-   
+        document.querySelector('.contact-form')?.addEventListener('submit', (event) => {
+            event.preventDefault();
+            showNotification(
+                'Seller inquiries are not connected in this demo. Please use the Contact page instead.',
+                'warning'
+            );
+        });
+    } catch (error) {
+        console.error('Unable to load the selected checkout item:', error);
+        window.location.replace('sales_page.html');
+    }
 });

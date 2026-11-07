@@ -1,6 +1,10 @@
+import { ProfilePicture } from '../components/AuthModal.js';
 import { showNotification } from '../services/notifications.js';
+import { formatPrice } from '../services/price.js';
 
 document.addEventListener("DOMContentLoaded", () => {
+    new ProfilePicture(document.getElementById("profile_pic"));
+
     const selected_product = sessionStorage.getItem("selected_item");
     const body = document.body;
 
@@ -8,8 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selected_product) {
         const product = JSON.parse(selected_product);
         const left_container = document.querySelector(".left_container");
-
-        console.log(product);
 
 
         // const return_cta = document.getElementById("return");
@@ -22,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const image_div = document.createElement("div");
         image_div.classList.add("image_div");
         const image_ = document.createElement("img");
-        image_.src = product.image || "../Images/13.png";
+        image_.src = product.image?.trim() || "Images/13.png";
         image_.alt = product.name;
         image_div.appendChild(image_);
 
@@ -39,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const price = document.createElement("h4");
         price.id = "price";
-        price.innerHTML = `€  ${product.price}`;
+        price.textContent = `€  ${formatPrice(product.price)}`;
 
         const description_div = document.createElement("div");
         description_div.classList.add("description_div");
@@ -51,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
         product_desc.innerText = product.description;
 
         const seller = document.createElement("p");
-        seller.innerHTML = ` Sold By: ${product.soldBy_name || "Unknown Seller"}`;
+        seller.textContent = ` Sold By: ${product.soldBy_name || "Unknown Seller"}`;
 
         const status_label = document.createElement("p");
         status_label.innerText = "Condition: ";
@@ -95,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const qty = document.createElement("p");
         qty.id = "Qunatity";
-        qty.innerHTML = ` Qty: ${product.product_quantity}`;
+        qty.textContent = ` Qty: ${product.product_quantity}`;
 
         const qty_label = document.createElement("label");
         qty_label.innerText = "Qty: ";
@@ -160,6 +162,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         right_container.appendChild(product_listing);
         body.appendChild(right_container);
+    } else {
+        const emptyState = document.getElementById("empty-listing-state");
+        if (emptyState) emptyState.hidden = false;
+        document.querySelector(".left_container")?.setAttribute("hidden", "");
+        document.querySelector(".right_container")?.setAttribute("hidden", "");
     }
 
 

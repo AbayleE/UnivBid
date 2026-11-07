@@ -4,21 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>product</title>
+    <title>Listing details | UnivBid</title>
     <link rel="stylesheet" href="Styles/main.css">
     <link rel="stylesheet" href="Styles/plp.css">
+    <link rel="stylesheet" href="Styles/portfolio.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 </head>
 
 <body>
    <nav class="main-header-nav">
-          <img src="../Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
+          <img src="Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
         <div class="link-navbar">
             <button id="add_product_btn"> <big>+</big> &nbsp; Create Auction </button>
             <i class="fa-regular fa-bell"></i>
             <div class="profile_avatar_container">
-                <a href="profile.html"> <img src="Images/11.png" alt="" id="profile_pic"> </a>
+                <a href="profile.html"> <img src="Images/11.png" alt="Your profile" id="profile_pic"> </a>
             </div>
         </div>
     </nav>
@@ -28,6 +29,12 @@
     </div>
     <div class="right_container">
     </div>
+    <section class="empty-state" id="empty-listing-state" hidden>
+        <span class="empty-state-icon" aria-hidden="true"><i class="fa-solid fa-box-open"></i></span>
+        <h1>No listing selected</h1>
+        <p>Choose a listing from the marketplace to see its details.</p>
+        <a href="sales_page.html">Browse listings</a>
+    </section>
 
     
     <div id="global-notification" class="notification hidden">

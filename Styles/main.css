@@ -78,9 +78,9 @@ body {
   line-height: 1.6;
   letter-spacing: 0.02em;
   word-spacing: 0.05em;
-  display: flex;
-  height: 100vh;
+  min-height: 100vh;
   width: 100%;
+  overflow-x: hidden;
   background-color: var(--color-background);
 }
 
@@ -200,11 +200,10 @@ ul li a {
 }
 
 .logo {
-  background-image: url(../Images/logo-transparent_.png);
-  height: 2vh;
+  display: block;
+  height: 44px;
   width: auto;
-  background-size: contain;
-  background-repeat: no-repeat;
+  object-fit: contain;
   margin-left: var(--gap-xlarge);
 }
 
