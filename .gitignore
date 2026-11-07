@@ -4,7 +4,11 @@ node_modules/
 # Project-specific folders
 File_structure/
 
-# Secrets
-stripe-backend/.env
+# Logs and local artifacts
+*.log
+.DS_Store
 
+# Secrets and environment files
 .env
+.env.*
+stripe-backend/.env

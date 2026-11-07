@@ -1,4 +1,5 @@
 import { AuthButton } from '../components/AuthModal.js';
+import { enableListingSearch } from '../services/search.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     const bodyLeft = document.querySelector(".main_section");
@@ -19,5 +20,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const browse_button = document.querySelector(".cta_browse");
     const login_button = document.querySelector(".login_btn");
     new AuthButton(cta_button, browse_button, login_button);
+    enableListingSearch();
 
+    const signup_button = document.querySelector(".cta_signup");
+    signup_button?.addEventListener("click", () => {
+        window.location.href = "sign_up.html";
+    });
 });

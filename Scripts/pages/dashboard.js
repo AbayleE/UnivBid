@@ -1,8 +1,12 @@
 import { Loaduserslistings } from '../components/ProductCard.js';
 import { ProfilePicture } from '../components/AuthModal.js';
+import { enableListingSearch } from '../services/search.js';
+import { logoutuser } from '../services/auth.js';
+import { showNotification } from '../services/notifications.js';
 
 
 document.addEventListener("DOMContentLoaded", async function () {
+    enableListingSearch();
     const body = document.body;
     const add_product_btn = document.getElementById("add_product_btn");
     const profile_picture = document.getElementById("profile_pic");
@@ -21,8 +25,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     pages_container.classList.add("pages_container");
 
 
-    const pages = ["Home", "My Dashboard", "Product Sale", "Support", "Account", "Sign Out"];
-    const page_link = ["index.html", "Dashboard.html", "sales_page.html", "contact.html", "profile.html", "index.html"];
+    const pages = ["Home", "My Dashboard", "Browse Listings", "Contact", "Account", "Sign Out"];
+    const page_link = ["index.html", "dashboard.html", "sales_page.html", "contact.html", "profile.html", "index.html"];
     const icons = ["fa-house", "fa-chart-line", "fa-store", "fa-headset", "fa-user", "fa-sign-out"];
 
 
@@ -30,6 +34,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     pages.forEach((page, indx) => {
         const links = document.createElement('a');
         links.href = page_link[indx];
+        if (page === "Sign Out") {
+            links.addEventListener("click", async (event) => {
+                event.preventDefault();
+                const result = await logoutuser();
+                if (result.error) {
+                    showNotification(`Sign out failed: ${result.error}`, "error");
+                    return;
+                }
+                window.location.href = "index.html";
+            });
+        }
 
         const icon = document.createElement("i");
         icon.classList.add("fa-solid", icons[indx]);

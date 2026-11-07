@@ -1,4 +1,12 @@
 {
+  "name": "univbid",
+  "version": "1.0.0",
+  "description": "UnivBid is a student-focused auction platform for buying and selling campus essentials.",
+  "private": true,
+  "scripts": {
+    "start": "node stripe-backend/server.js",
+    "dev": "node --watch stripe-backend/server.js"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",

@@ -209,7 +209,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         "Take cleaar, well-lit photos from multiple angles",
         "Set a reasonable starting price",
         "Be available for pickup arramgements",
-        "Follow university guidelines for student transcations"
+        "Follow university guidelines for student transactions"
     ];
 
     terms_list_value.forEach((terms, indx) => {

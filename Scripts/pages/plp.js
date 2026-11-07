@@ -9,8 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const product = JSON.parse(selected_product);
         const left_container = document.querySelector(".left_container");
 
-        console.log(product);
-
 
         // const return_cta = document.getElementById("return");
         // return_cta.addEventListener("click", () => {
@@ -39,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const price = document.createElement("h4");
         price.id = "price";
-        price.innerHTML = `€  ${product.price}`;
+        price.textContent = `€  ${product.price}`;
 
         const description_div = document.createElement("div");
         description_div.classList.add("description_div");
@@ -51,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         product_desc.innerText = product.description;
 
         const seller = document.createElement("p");
-        seller.innerHTML = ` Sold By: ${product.soldBy_name || "Unknown Seller"}`;
+        seller.textContent = ` Sold By: ${product.soldBy_name || "Unknown Seller"}`;
 
         const status_label = document.createElement("p");
         status_label.innerText = "Condition: ";
@@ -95,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const qty = document.createElement("p");
         qty.id = "Qunatity";
-        qty.innerHTML = ` Qty: ${product.product_quantity}`;
+        qty.textContent = ` Qty: ${product.product_quantity}`;
 
         const qty_label = document.createElement("label");
         qty_label.innerText = "Qty: ";
@@ -160,6 +158,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         right_container.appendChild(product_listing);
         body.appendChild(right_container);
+    } else {
+        const emptyState = document.getElementById("empty-listing-state");
+        if (emptyState) emptyState.hidden = false;
+        document.querySelector(".left_container")?.setAttribute("hidden", "");
+        document.querySelector(".right_container")?.setAttribute("hidden", "");
     }
 
 

@@ -54,9 +54,7 @@ export class imageUpload {
 
                 if (response.ok) {
                     const image_url = result.secure_url;
-                    console.log(image_url);
                     this.imageURL = image_url;
-                    console.log("Image uploaded to Cloudinary:", image_url);
                     return {image_url};
                 } else {
                     console.error('Upload failed:', result.error.message);
@@ -222,9 +220,7 @@ export class Loaduserslistings {
 
                     if (response.ok) {
                         const image_url = result.secure_url;
-                        console.log(image_url);
                         imageURL = image_url;
-                        console.log("Image uploaded to Cloudinary:", image_url);
                     } else {
                         console.error('Upload failed:', result.error.message);
                     }
@@ -398,10 +394,14 @@ export class Loaduserslistings {
             info_product.classList.add("info_product");
 
             const name = document.createElement("span");
-            name.innerHTML = `<strong> Product Name: </strong> ${data.name || "No Name Available"}`;
+            const name_label = document.createElement("strong");
+            name_label.textContent = " Product Name: ";
+            name.append(name_label, ` ${data.name || "No Name Available"}`);
             info_product.appendChild(name);
             const price = document.createElement("span");
-            price.innerHTML = `<strong>Price:</strong> € ${data.price || "N/A"}`;
+            const price_label = document.createElement("strong");
+            price_label.textContent = "Price:";
+            price.append(price_label, ` € ${data.price || "N/A"}`);
             info_product.appendChild(price);
 
             product_card.appendChild(info_product);
@@ -509,7 +509,6 @@ export class getallProducts {
 
             if (result.success) {
                 if (result.products && result.products.length > 0) {
-                    console.log(result.products);
                     this.displayallProducts(result.products);
                 } else {
                     this.container.innerHTML = "<p>No available products found.</p>";
@@ -548,7 +547,9 @@ export class getallProducts {
             info_product.classList.add("info_product");
 
             const name = document.createElement("span");
-            name.innerHTML = `<strong>${data.name || "No Name Available"}</strong>`;
+            const name_text = document.createElement("strong");
+            name_text.textContent = data.name || "No Name Available";
+            name.appendChild(name_text);
             info_product.appendChild(name);
 
             const listing_rank = document.createElement("span");
@@ -587,7 +588,7 @@ export class getallProducts {
             info_product.appendChild(listing_rank);
 
             const price = document.createElement("span");
-            price.innerHTML = ` €‎ ${data.price || "N/A"} `;
+            price.textContent = ` €‎ ${data.price || "N/A"} `;
             price.style.color = "#2f2f2f";
             info_product.appendChild(price);
 

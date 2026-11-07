@@ -4,41 +4,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Create an account | UnivBid</title>
     <link rel="stylesheet" href="Styles/style_sign.css">
     <link rel="stylesheet" href="Styles/main.css">
+    <link rel="stylesheet" href="Styles/portfolio.css">
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 
 <body>
     <div class="main-container ">
-        <!-- <img src="/Images/logo.png" alt="Logo" width="200"> -->
+        <img src="Images/logo-transparent_.png" alt="UnivBid" class="logo">
         <div class="form-container signUP">
             <h2>Create Your Account</h2>
-            <p style="margin-bottom: 24px; font-size:14px">Join thousands of students buying and selling on UnivBid</p>
+            <p style="margin-bottom: 24px; font-size:14px">Join your campus community on UnivBid</p>
             <form id="sign_upform">
                 <div class="input-group-flex">
                     <div class="input-group">
-                        <label for="name">First Name: </label>
-                        <input type="text" id="Fname" name="name" placeholder="👤 John">
+                        <label for="Fname">First Name: </label>
+                        <input type="text" id="Fname" name="firstName" placeholder="John" required>
                     </div>
                     <div class="input-group">
-                        <label for="name">Last Name: </label>
-                        <input type="text" id="Lname" name="name" placeholder=" Doe" required>
+                        <label for="Lname">Last Name: </label>
+                        <input type="text" id="Lname" name="lastName" placeholder="Doe" required>
                     </div>
                 </div>
 
                 <div class="input-group-flex">
                     <div class="input-group">
-                        <label for="name">Univeristy: </label>
-                        <input type="text" id="university" name="name" placeholder=" 🎓 University">
+                        <label for="university">University: </label>
+                        <input type="text" id="university" name="university" placeholder="University name">
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <label for="email">Univeristy Email: </label>
-                    <input type="email" id="email" name="email" placeholder=" 📧 abcdef@constructor.university"
+                    <label for="email">Email address: </label>
+                    <input type="email" id="email" name="email" placeholder="name@university.edu"
                         required>
                     <!-- <small style="font-size:x-small"><i>Use your Univeristy email address for verification
                         </i></small> -->
@@ -58,14 +59,6 @@
                 </div>
                 <button type="submit" class="btn-primary" id="submit">Create Account</button>
             </form>
-            <div class="or-separator">
-                <span> Or continue with </span>
-            </div>
-
-            <button id="googleSignInBtn">
-                <i class="fab fa-google" style="color:white"></i> &nbsp; Sign up with Google
-            </button>
-
             <p>Already have an account? <a href="sign_in.html">Sign In</a></p>
         </div>
     </div>

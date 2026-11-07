@@ -38,23 +38,33 @@ export const logoutuser = async () => {
 };
 
 
-export const registerUser = async (First_name, Last_name, email, password, phone = "", university = "", avatar = "", contact_choice = {
-    contact_email: true,
-    contact_phone: false,
-}) => {
-    const full_name = First_name + Last_name;
-    const url_avatar = `https://robohash.org/${full_name}.png?size=200x200`;
+export const registerUser = async (
+    First_name,
+    Last_name,
+    email,
+    password,
+    phone = "",
+    university = "",
+    avatar = "",
+    contact_choice = {
+        contact_email: true,
+        contact_phone: false,
+    }
+) => {
+    const full_name = `${(First_name || '').trim()} ${(Last_name || '').trim()}`.trim();
+    const url_avatar = avatar || `https://robohash.org/${encodeURIComponent(full_name || email)}.png?size=200x200`;
+
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         const userData = {
-            email: email,
-            firstName: First_name,
-            lastName: Last_name,
+            email,
+            firstName: First_name.trim(),
+            lastName: Last_name.trim(),
             UserID: user.uid,
             phone,
             university,
-            avatar:url_avatar,
+            avatar: url_avatar,
             contact_choice,
         };
 

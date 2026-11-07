@@ -4,21 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sale</title>
+    <title>Dashboard | UnivBid</title>
     <link rel="stylesheet" href="Styles/main.css">
     <!-- <link rel="stylesheet" href="Styles/style_listing_page.css"> -->
      <link rel="stylesheet" href="Styles/style_dashboard.css">
+    <link rel="stylesheet" href="Styles/portfolio.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 </head>
 
 <body>
    <nav class="main-header-nav">
-        <img src="../Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
+        <img src="Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
 
         <div class="search_bar">
-            <input type="text" name="search_input" placeholder="Search Auctions ..." />
-            <button id="search_btn">
+            <input type="search" name="search_input" placeholder="Search your listings" aria-label="Search your listings">
+            <button id="search_btn" type="button" aria-label="Search listings">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </button>
         </div>
@@ -28,7 +29,7 @@
             <i class="fa-solid fa-bell"></i>
             <i class=" fa-solid fa-shopping-cart"></i>
             <div class="profile_avatar_container">
-                <a href="profile.html"> <img src="Images/11.png" alt="" id="profile_pic"> </a>
+                <a href="profile.html"> <img src="Images/11.png" alt="Your profile" id="profile_pic"> </a>
             </div>
         </div>
     </nav>

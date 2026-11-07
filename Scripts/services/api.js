@@ -30,14 +30,11 @@ export const updateuserProfile = async (updatedDOC) => {
 
     const docref = doc(db, 'users', user.uid);
     await updateDoc(docref, updatedDOC);
-    console.log("Here");
     return { success: true, user_val: user };
-
   } catch (error) {
     console.error("Error updating user:", error.message);
     return { success: false, error: error.message };
   }
-
 };
 
 /* Fetching product details*/
@@ -52,19 +49,17 @@ export const getproductDetail = async () => {
     const products = [];
 
     if (listings_snapshot.empty) {
-      console.log("No products found for this user.");
       return { success: true, products: null };
-    } else {
-      listings_snapshot.forEach(Docs => {
-        products.push({
-          id: doc.id,
-          ...Docs.data()
-        });
-      });
     }
 
-    return { success: true, products: products };
+    listings_snapshot.forEach((docs) => {
+      products.push({
+        id: docs.id,
+        ...docs.data(),
+      });
+    });
 
+    return { success: true, products };
   } catch (error) {
     console.error("Error loading products:", error.message);
     return { success: false, error: error.message };
@@ -73,7 +68,7 @@ export const getproductDetail = async () => {
 
 
 /**
- Adding new products 
+ Adding new products
  */
 export const addNewProduct = async (productDetail) => {
   try {
@@ -82,19 +77,19 @@ export const addNewProduct = async (productDetail) => {
 
     const productref = doc(collection(db, "products"));
     const currentUserdata = await getCurrentuserdata();
-    const product = await setDoc(productref, {
+    const productPayload = {
       pid: productref.id,
       status: "Available",
       soldBy: user.uid,
-      soldBy_name: currentUserdata.firstName,
+      soldBy_name: currentUserdata?.firstName || "Unknown seller",
       dateListed: new Date(),
-      ...productDetail
-    });
+      ...productDetail,
+    };
 
-    return { success: true, product: product };
-
+    await setDoc(productref, productPayload);
+    return { success: true, product: productPayload };
   } catch (error) {
-    console.log("Failed to add product: ", error.message);
+    console.error("Failed to add product:", error.message);
     return { success: false, error: error.message };
   }
 };
@@ -107,12 +102,10 @@ export const updateProductDetail = async (productDetail, pid) => {
     const productref = doc(db, "products", pid);
     await updateDoc(productref, productDetail);
     return { success: true };
-
   } catch (error) {
-    console.log("Failed to update product: ", error.message);
+    console.error("Failed to update product:", error.message);
     return { success: false, error: error.message };
   }
-
 };
 
 export const deleteProduct = async (pid) => {
@@ -123,12 +116,11 @@ export const deleteProduct = async (pid) => {
     const productRef = doc(db, "products", pid);
     await deleteDoc(productRef);
     return { success: true };
-
   } catch (error) {
-    console.log("Failed to delete product: ", error.message);
+    console.error("Failed to delete product:", error.message);
     return { success: false, error: error.message };
   }
-}
+};
 
 export const fetchProducts = async (UserID) => {
   try {
@@ -144,20 +136,21 @@ export const fetchProducts = async (UserID) => {
 
     if (listings_snapshot.empty) {
       return { success: true, products: null };
-    } else {
-      listings_snapshot.forEach(Docs => {
-        products.push({
-          ...Docs.data()
-        });
-      });
     }
-    return { success: true, products: products };
 
+    listings_snapshot.forEach((docs) => {
+      products.push({
+        id: docs.id,
+        ...docs.data(),
+      });
+    });
+
+    return { success: true, products };
   } catch (error) {
-    console.log("Failed to fetch products from the db: ", error.message);
+    console.error("Failed to fetch products from the db:", error.message);
     return { success: false, error: error.message };
   }
-}
+};
 
 export const fetchuser_profile = async () => {
   try {
@@ -169,12 +162,13 @@ export const fetchuser_profile = async () => {
 
     if (docSnap.exists()) {
       const userdata = docSnap.data();
-      const userProfile = userdata.avatar || "../Images/11.png";
+      const userProfile = userdata.avatar || "Images/11.png";
       return { success: true, profile_pic: userProfile };
-
     }
+
+    return { success: true, profile_pic: "Images/11.png" };
   } catch (error) {
-    console.log("Failed to fetch products from the db: ", error.message);
+    console.error("Failed to fetch product profile:", error.message);
     return { success: false, error: error.message };
   }
-}
+};
