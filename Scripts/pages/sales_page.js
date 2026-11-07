@@ -1,3 +1,4 @@
+import { ProfilePicture } from '../components/AuthModal.js';
 import { getallProducts } from '../components/ProductCard.js';
 import { enableListingSearch } from '../services/search.js';
 import { logoutuser } from '../services/auth.js';
@@ -5,6 +6,7 @@ import { showNotification } from '../services/notifications.js';
 
 document.addEventListener("DOMContentLoaded", async function () {
     enableListingSearch();
+    new ProfilePicture(document.getElementById("profile_pic"));
 
     const body = document.body;
 

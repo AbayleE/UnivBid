@@ -14,6 +14,12 @@ import {
   getDocs,
   query,
   where,
+  orderBy,
+  limit,
+  startAfter,
+  getAggregateFromServer,
+  sum,
+  count,
   updateDoc,
   onSnapshot,
   setPersistence,
@@ -122,32 +128,61 @@ export const deleteProduct = async (pid) => {
   }
 };
 
-export const fetchProducts = async (UserID) => {
+export const PRODUCTS_PAGE_SIZE = 12;
+
+// Loads one page of available listings, newest first. Pass the returned cursor
+// to get the next page. The viewer's own listings are filtered out here rather
+// than in the query, because a "!=" filter prevents ordering by date.
+export const fetchProducts = async (UserID, cursor = null) => {
   try {
-    const listings_list = collection(db, "products");
-    const listing_query = query(
-      listings_list,
+    const constraints = [
       where("status", "==", "Available"),
-      where("soldBy", "!=", UserID)
-    );
+      orderBy("dateListed", "desc"),
+      limit(PRODUCTS_PAGE_SIZE),
+    ];
+    if (cursor) constraints.push(startAfter(cursor));
 
-    const listings_snapshot = await getDocs(listing_query);
-    const products = [];
+    const listings_snapshot = await getDocs(query(collection(db, "products"), ...constraints));
+    const products = listings_snapshot.docs
+      .filter((listing) => listing.data().soldBy !== UserID)
+      .map((listing) => ({ id: listing.id, ...listing.data() }));
 
-    if (listings_snapshot.empty) {
-      return { success: true, products: null };
-    }
-
-    listings_snapshot.forEach((docs) => {
-      products.push({
-        id: docs.id,
-        ...docs.data(),
-      });
-    });
-
-    return { success: true, products };
+    return {
+      success: true,
+      products,
+      cursor: listings_snapshot.docs.at(-1) ?? cursor,
+      hasMore: listings_snapshot.size === PRODUCTS_PAGE_SIZE,
+    };
   } catch (error) {
     console.error("Failed to fetch products from the db:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+// Totals are computed by Firestore, so no order documents are downloaded.
+export const fetchSellerSales = async () => {
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No authenticated user");
+
+    const orders_query = query(
+      collection(db, "orders"),
+      where("sellerUid", "==", user.uid),
+      where("status", "==", "paid")
+    );
+    const totals = (await getAggregateFromServer(orders_query, {
+      soldCount: count(),
+      grossCents: sum("amountCents"),
+      feeCents: sum("platformFeeCents"),
+    })).data();
+
+    return {
+      success: true,
+      soldCount: totals.soldCount,
+      earningsCents: totals.grossCents - totals.feeCents,
+    };
+  } catch (error) {
+    console.error("Failed to load sales:", error.message);
     return { success: false, error: error.message };
   }
 };

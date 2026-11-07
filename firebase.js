@@ -23,6 +23,12 @@ import {
   addDoc,
   query,
   where,
+  orderBy,
+  limit,
+  startAfter,
+  getAggregateFromServer,
+  sum,
+  count,
 } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
 
 const fallbackConfig = {
@@ -68,6 +74,12 @@ export {
   getDocs,
   query,
   where,
+  orderBy,
+  limit,
+  startAfter,
+  getAggregateFromServer,
+  sum,
+  count,
   onSnapshot,
   deleteDoc,
   setPersistence,

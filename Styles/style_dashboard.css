@@ -246,7 +246,7 @@ dialog::backdrop {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-#total_bought_items,
+#total_active_listings,
 #total_sold_items,
 #total_earning {
     color: var(--color-background);

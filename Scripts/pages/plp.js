@@ -1,7 +1,10 @@
+import { ProfilePicture } from '../components/AuthModal.js';
 import { showNotification } from '../services/notifications.js';
 import { formatPrice } from '../services/price.js';
 
 document.addEventListener("DOMContentLoaded", () => {
+    new ProfilePicture(document.getElementById("profile_pic"));
+
     const selected_product = sessionStorage.getItem("selected_item");
     const body = document.body;
 
@@ -21,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const image_div = document.createElement("div");
         image_div.classList.add("image_div");
         const image_ = document.createElement("img");
-        image_.src = product.image || "../Images/13.png";
+        image_.src = product.image?.trim() || "Images/13.png";
         image_.alt = product.name;
         image_div.appendChild(image_);
 

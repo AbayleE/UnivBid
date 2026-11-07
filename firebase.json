@@ -1,5 +1,25 @@
 {
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "firestore.rules",
+      "firestore.indexes.json",
+      "package.json",
+      "package-lock.json",
+      "README.md",
+      "**/.*",
+      "**/.*/**",
+      "**/node_modules/**",
+      "stripe-backend/**",
+      "tests/**",
+      "codebase-analysis-docs/**",
+      "File_structure/**",
+      "dashboard_test.html"
+    ]
   }
 }

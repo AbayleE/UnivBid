@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         name.textContent = product.name || 'Selected item';
         price.textContent = `€ ${checkout.total_price}`;
         condition.textContent = `Condition: ${product.condition || 'Not specified'}`;
-        image.src = product.image || 'Images/13.png';
+        image.src = product.image?.trim() || 'Images/13.png';
         image.alt = product.name ? `Preview of ${product.name}` : 'Product preview';
 
         document.querySelector('.contact-form')?.addEventListener('submit', (event) => {

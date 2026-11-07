@@ -795,7 +795,7 @@ footer {
   box-shadow: none;
 }
 
-#total_bought_items,
+#total_active_listings,
 #total_sold_items,
 #total_earning {
   color: var(--color-text-primary);

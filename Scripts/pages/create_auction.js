@@ -1,9 +1,14 @@
-import { createListing } from '../components/ProductCard.js';
-import { imageUpload } from '../components/ProductCard.js';
+import { auth } from '../../firebase.js';
+import { ProfilePicture } from '../components/AuthModal.js';
+import { addNewProduct } from '../services/api.js';
 import { showNotification } from '../services/notifications.js';
 import { parsePrice } from '../services/price.js';
+import { uploadImage } from '../services/upload.js';
+
 document.addEventListener("DOMContentLoaded", async function () {
     const body = document.body;
+
+    new ProfilePicture(document.getElementById("profile_pic"));
 
     const body_right = document.createElement("div");
     body_right.classList.add("body_right");
@@ -157,12 +162,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     product_image.accept = "image/*";
     product_image.id = "product_image";
     product_image.required = true;
-    const file = product_image.files[0];
-
-    // product_image.addEventListener("change", async function () {
-    //     let imageURL = new imageUpload(file, imageURL);
-    //     console.log(imageURL);
-    // });
 
     product_image_cont.append(product_image_label, product_image);
 
@@ -225,7 +224,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     const agreement_checkbox = document.createElement("input");
     agreement_checkbox.type = "checkbox";
     agreement_checkbox.id = "agreementCheckbox";
-    agreement_checkbox.required;
 
     const agreement_label = document.createElement("label");
     agreement_label.htmlFor = "agreementCheckbox";
@@ -249,7 +247,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     button_div.appendChild(button_create_auction);
     body_right.appendChild(button_div);
 
-    button_create_auction.addEventListener("click", () => {
+    button_create_auction.addEventListener("click", async () => {
         const required_fields = [
             product_name,
             product_description,
@@ -258,7 +256,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             product_quantity,
             category_select,
             auction_deadline,
-            agreement_checkbox
+            product_image
         ];
 
         const invalid_fields = required_fields.filter(input=> {
@@ -275,17 +273,41 @@ document.addEventListener("DOMContentLoaded", async function () {
             return;
         }
 
-        const productvalues = {
-            name: product_name.value,
-            description: product_description.value,
-            price,
-            condition: condition_labels.value,
-            image: "",
-            product_quantity: product_quantity.value,
-            categories: category_select.value,
-            auction_deadline: auction_deadline.value
+        if (!agreement_checkbox.checked) {
+            showNotification("Please agree to the Terms of Service and Community Guidelines.", 'error');
+            return;
         }
-        new createListing(productvalues);
+
+        if (!auth.currentUser) {
+            showNotification("Please sign in to create a listing.", 'error');
+            return;
+        }
+
+        button_create_auction.disabled = true;
+
+        try {
+            const image = await uploadImage(product_image.files[0]);
+            const result = await addNewProduct({
+                name: product_name.value,
+                description: product_description.value,
+                price,
+                condition: condition_labels.value,
+                image,
+                product_quantity: product_quantity.value,
+                categories: category_select.value,
+                auction_deadline: auction_deadline.value
+            });
+            if (!result.success) throw new Error(result.error || "Failed to add product");
+
+            showNotification("Product added successfully!", 'success');
+            setTimeout(() => {
+                window.location.href = "dashboard.html";
+            }, 1200);
+        } catch (error) {
+            console.error("Failed to add product:", error);
+            showNotification(`Product Add Failed: ${error.message}`, 'error');
+            button_create_auction.disabled = false;
+        }
     })
 
     body.appendChild(body_right);

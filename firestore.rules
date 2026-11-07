@@ -72,12 +72,21 @@ service cloud.firestore {
       // soldBy, status, pid, soldBy_name and dateListed cannot change here.
       allow update: if signedIn()
         && resource.data.soldBy == request.auth.uid
+        && resource.data.status == 'Available'
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
              'name', 'description', 'price', 'condition', 'image',
              'product_quantity', 'categories', 'auction_deadline'])
         && validListing(request.resource.data);
 
       allow delete: if signedIn() && resource.data.soldBy == request.auth.uid;
+    }
+
+    // Orders are written only by the Stripe webhook (Admin SDK).
+    match /orders/{orderId} {
+      allow read: if signedIn()
+        && (resource.data.sellerUid == request.auth.uid
+            || resource.data.buyerUid == request.auth.uid);
+      allow write: if false;
     }
 
     match /{document=**} {

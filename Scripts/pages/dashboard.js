@@ -3,12 +3,12 @@ import { ProfilePicture } from '../components/AuthModal.js';
 import { enableListingSearch } from '../services/search.js';
 import { logoutuser } from '../services/auth.js';
 import { showNotification } from '../services/notifications.js';
+import { fetchSellerSales } from '../services/api.js';
 
 
 document.addEventListener("DOMContentLoaded", async function () {
     enableListingSearch();
     const body = document.body;
-    const add_product_btn = document.getElementById("add_product_btn");
     const profile_picture = document.getElementById("profile_pic");
 
     document.getElementById("add_product_btn").addEventListener("click", function () {
@@ -141,30 +141,30 @@ document.addEventListener("DOMContentLoaded", async function () {
     total_sold_items.append(display_sold);
 
 
-    const total_bought_items = document.createElement("div");
-    total_bought_items.classList.add("overview_div");
-    total_bought_items.id = "total_bought_items";
+    const total_active_listings = document.createElement("div");
+    total_active_listings.classList.add("overview_div");
+    total_active_listings.id = "total_active_listings";
 
-    const display_buy = document.createElement("div");
-    display_buy.classList.add("display_div");
+    const display_active = document.createElement("div");
+    display_active.classList.add("display_div");
 
-    const title_container_buy = document.createElement("div");
-    title_container_buy.classList.add("title_container");
+    const title_container_active = document.createElement("div");
+    title_container_active.classList.add("title_container");
 
-    const display_buy_value = document.createElement("h2");
-    display_buy_value.innerText = "0";
-    const display_buy_text = document.createElement("p");
-    display_buy_text.innerText = "Total Bought Items";
+    const display_active_value = document.createElement("h2");
+    display_active_value.innerText = "0";
+    const display_active_text = document.createElement("p");
+    display_active_text.innerText = "Active Listings";
 
-    title_container_buy.append(display_buy_value, display_buy_text);
+    title_container_active.append(display_active_value, display_active_text);
 
-    const display_buy_icon = document.createElement("i");
-    display_buy_icon.classList.add("fa-solid", "fa-shopping-cart");
+    const display_active_icon = document.createElement("i");
+    display_active_icon.classList.add("fa-solid", "fa-store");
 
-    display_buy.append(display_buy_icon, title_container_buy);
-    total_bought_items.append(display_buy);
+    display_active.append(display_active_icon, title_container_active);
+    total_active_listings.append(display_active);
 
-    content_box.append(total_earnings, total_sold_items, total_bought_items);
+    content_box.append(total_earnings, total_sold_items, total_active_listings);
     main_content.append(content_box);
 
     body_right.appendChild(main_content);
@@ -172,11 +172,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     const listing_board = document.createElement("div");
     listing_board.classList.add("listing_board");
 
-    new Loaduserslistings(listing_board, add_product_btn, header_lp_subtitle, body);
+    const updateStats = async (products) => {
+        display_active_value.innerText = products.filter((product) => product.status === "Available").length;
+
+        const result = await fetchSellerSales();
+        if (!result.success) return;
+
+        display_earning_value.innerText = (result.earningsCents / 100).toFixed(2);
+        display_sold_title.innerText = result.soldCount;
+    };
+
+    new Loaduserslistings(listing_board, header_lp_subtitle, body, updateStats);
 
     body_right.appendChild(listing_board);
     body.appendChild(body_right);
-
-    //new userDashboardData( main_table_cont, display_sold_title, display_buy_value, display_earning_value);
 
 });

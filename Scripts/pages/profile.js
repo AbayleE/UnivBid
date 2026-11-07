@@ -1,9 +1,11 @@
-import { profileLoad } from '../components/AuthModal.js';
+import { ProfilePicture, profileLoad } from '../components/AuthModal.js';
 import { logoutuser } from '../services/auth.js';
 import { showNotification } from '../services/notifications.js';
 document.addEventListener("DOMContentLoaded", function () {
 
     const body = document.body;
+
+    new ProfilePicture(document.getElementById("profile_pic"));
 
     document.getElementById("add_product_btn").addEventListener("click", function () {
         window.location.href = "create_auction.html";
@@ -102,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
     check_box_email.id = "check_box_email";
     
     const label_email = document.createElement("label");
-    label_email.setAttribute("for", "email");
+    label_email.setAttribute("for", "check_box_email");
     label_email.innerText = "Email";
     
     const check_box_phone = document.createElement("input");
@@ -110,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
     check_box_phone.id = "check_box_phone";
     
     const label_phone = document.createElement("label");
-    label_phone.setAttribute("for", "phone");
+    label_phone.setAttribute("for", "check_box_phone");
     label_phone.innerText = "Phone";
     
     contact_choice.append(check_box_email, label_email, check_box_phone, label_phone);

@@ -173,7 +173,7 @@ export class profileLoad {
                 this.loadProfileData();
             } else {
                 showNotification(`Please Login first! `, 'error');
-                window.location.href = "signin.html";
+                window.location.href = "sign_in.html";
             }
         });
     }
@@ -207,8 +207,8 @@ export class profileLoad {
         this.email.value = user_data.email || '';
         this.container.style.backgroundImage = `url(${user_data.avatar})`;
         this.university.value = user_data.university || '';
-        this.check_box_email.checked = user_data.contact_email || true;
-        this.check_box_phone.checked = user_data.contact_phone || false;
+        this.check_box_email.checked = user_data.contact_choice?.contact_email ?? true;
+        this.check_box_phone.checked = user_data.contact_choice?.contact_phone ?? false;
     }
 
     async updateProfile() {
@@ -251,9 +251,6 @@ export class ProfilePicture {
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 this.addProfilePicture();
-            } else {
-                showNotification(`Please Login first! `, 'error');
-                window.location.href = "signin.html";
             }
         });
 
@@ -264,10 +261,10 @@ export class ProfilePicture {
         if (!auth.currentUser) return;
         try {
             const Userdata = await fetchuser_profile();
-            if (Userdata) {
-                this.ProfilePicture= Userdata.profile_pic;
+            if (Userdata.success) {
+                this.ProfilePicture.src = Userdata.profile_pic;
             } else {
-                console.error("User Not found");
+                console.error("Failed to load profile picture:", Userdata.error);
             }
         } catch (error) {
             console.error("Failed to load profile:", error);

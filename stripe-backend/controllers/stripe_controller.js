@@ -2,6 +2,7 @@ import { db, stripe } from '../config/clients.js';
 import { env } from '../config/env.js';
 
 const PLATFORM_FEE_CENTS = 100;
+const CHECKOUT_WINDOW_SECONDS = 31 * 60;
 const PRODUCT_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
 const STRIPE_ACCOUNT_PATTERN = /^acct_[A-Za-z0-9]+$/;
 
@@ -70,7 +71,11 @@ export const handleCreateCheckout = async (req, res) => {
       metadata: {
         productId,
         buyerUid: req.user.uid,
+        sellerUid: product.soldBy,
+        platformFeeCents: String(PLATFORM_FEE_CENTS),
       },
+      // Stripe's minimum. A shorter window leaves less time to oversell the item.
+      expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_WINDOW_SECONDS,
       success_url: `${env.frontendOrigin}/success.html`,
       cancel_url: `${env.frontendOrigin}/cancel.html`,
     });
