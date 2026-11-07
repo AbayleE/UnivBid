@@ -2,6 +2,7 @@ import { auth, onAuthStateChanged } from '../../firebase.js';
 import { getproductDetail, updateProductDetail, addNewProduct, deleteProduct, fetchProducts } from '../services/api.js';
 import { getCurrentuserdata } from '../services/auth.js';
 import { showNotification } from '../services/notifications.js';
+import { formatPrice, parsePrice } from '../services/price.js';
 
 
 
@@ -270,10 +271,16 @@ export class Loaduserslistings {
 
         button_submit.addEventListener("click", async () => {
 
+            const price = parsePrice(product_price.value);
+            if (price === null) {
+                showNotification("Please enter a price greater than 0.", 'error');
+                return;
+            }
+
             const productvalues = {
                 name: product_name.value,
                 description: product_description.value,
-                price: parseFloat(product_price.value).toFixed(2),
+                price,
                 condition: condition_labels.value,
                 image: imageURL || "",
                 product_quantity: product_quantity.value
@@ -401,7 +408,7 @@ export class Loaduserslistings {
             const price = document.createElement("span");
             const price_label = document.createElement("strong");
             price_label.textContent = "Price:";
-            price.append(price_label, ` € ${data.price || "N/A"}`);
+            price.append(price_label, ` € ${formatPrice(data.price)}`);
             info_product.appendChild(price);
 
             product_card.appendChild(info_product);
@@ -588,7 +595,7 @@ export class getallProducts {
             info_product.appendChild(listing_rank);
 
             const price = document.createElement("span");
-            price.textContent = ` €‎ ${data.price || "N/A"} `;
+            price.textContent = ` €‎ ${formatPrice(data.price)} `;
             price.style.color = "#2f2f2f";
             info_product.appendChild(price);
 

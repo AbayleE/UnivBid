@@ -12,3 +12,6 @@ File_structure/
 .env
 .env.*
 stripe-backend/.env
+*service-account*.json
+*serviceAccount*.json
+*firebase-adminsdk*.json

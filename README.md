@@ -70,7 +70,11 @@ To start the optional Stripe API, configure the environment first, then run `npm
 stripe-backend/.env
 STRIPE_SK=your_stripe_secret_key
 DOMAIN=https://your-frontend-domain.example
+FIREBASE_PROJECT_ID=your_firebase_project_id
+GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/outside/the/repo/service-account.json
 ```
+
+The API requires a Firebase ID token (`Authorization: Bearer <token>`) and a JSON body of `{ "productId": "..." }`. It reads the price from `products/{productId}` and the payout account from `sellerStripeAccountId` on the seller's `users/{uid}` document. Only trusted server code may set that field.
 
 The frontend payment helper also expects `window.UNIVBID_CONFIG.stripeApiUrl` to point to the deployed API. Keep Stripe secret keys on the server only. Stripe Connect onboarding, payment verification, and success/cancel pages must be completed before enabling real transactions.
 

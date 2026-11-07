@@ -89,7 +89,7 @@ export class AddnewUser {
     }
 
     async registerUser() {
-        const newUser = await registerUser(this.firstname, this.lastname, this.email, this.password, this.university);
+        const newUser = await registerUser(this.firstname, this.lastname, this.email, this.password, "", this.university);
         if (newUser.success) {
             showNotification("User created successfully!", 'success');
             window.location.href = "sign_in.html";

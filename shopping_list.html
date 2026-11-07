@@ -57,7 +57,7 @@
             name.innerText = product.name;
   
             const price = document.createElement("p");
-            price.innerText = `Price: €${product.price}`;
+            price.innerText = `Price: €${Number(product.price).toFixed(2)}`;
   
             const quantity = document.createElement("p");
             quantity.innerText = `Quantity: ${product.quantity}`;

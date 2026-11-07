@@ -1,4 +1,5 @@
 import { showNotification } from '../services/notifications.js';
+import { formatPrice } from '../services/price.js';
 
 document.addEventListener("DOMContentLoaded", () => {
     const selected_product = sessionStorage.getItem("selected_item");
@@ -37,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const price = document.createElement("h4");
         price.id = "price";
-        price.textContent = `€  ${product.price}`;
+        price.textContent = `€  ${formatPrice(product.price)}`;
 
         const description_div = document.createElement("div");
         description_div.classList.add("description_div");

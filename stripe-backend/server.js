@@ -1,17 +1,18 @@
+import { env } from './config/env.js';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import stripeRoutes from './routes/stripe.js';
 
-dotenv.config();
-
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: env.frontendOrigin,
+  methods: ['POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+app.use(express.json({ limit: '10kb' }));
 
 app.use('/api/stripe', stripeRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Stripe backend running on port ${PORT}`);
+app.listen(env.port, () => {
+  console.log(`Stripe backend running on port ${env.port}`);
 });

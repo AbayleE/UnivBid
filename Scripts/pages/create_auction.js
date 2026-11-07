@@ -1,6 +1,7 @@
 import { createListing } from '../components/ProductCard.js';
 import { imageUpload } from '../components/ProductCard.js';
 import { showNotification } from '../services/notifications.js';
+import { parsePrice } from '../services/price.js';
 document.addEventListener("DOMContentLoaded", async function () {
     const body = document.body;
 
@@ -268,10 +269,16 @@ document.addEventListener("DOMContentLoaded", async function () {
             showNotification("Please fill in all required fields.",'error')
             return;
         }
+        const price = parsePrice(product_price.value);
+        if (price === null) {
+            showNotification("Please enter a price greater than 0.", 'error');
+            return;
+        }
+
         const productvalues = {
             name: product_name.value,
             description: product_description.value,
-            price: parseFloat(product_price.value).toFixed(2),
+            price,
             condition: condition_labels.value,
             image: "",
             product_quantity: product_quantity.value,
