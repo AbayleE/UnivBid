@@ -1,28 +1,25 @@
 # UnivBid
 
-UnivBid is a marketplace prototype where university students list and browse campus essentials. Sellers create listings with photos, buyers browse what's new, and a secured Node backend is ready to take Stripe payments once seller onboarding is added.
+A marketplace prototype where university students list and browse campus essentials.
 
 **Live demo:** _add your Firebase Hosting URL here after deploying_
 
 ## Features
 
-- **Accounts:** email and password sign-up with Firebase Auth. A failed profile save removes the half-created account so the email can be reused.
-- **Listings:** create a listing with a photo (uploaded to Cloudinary), then edit or delete it from your dashboard.
-- **Browse:** newest listings first, 12 at a time, with Load more.
-- **Dashboard:** active listings, items sold and earnings. Sales totals are computed by Firestore rather than downloaded.
-- **Profile:** edit your details and contact preferences.
-- **Security:**
-  - Firestore rules deny everything by default and validate every listing field.
-  - User content is rendered as text, never HTML.
-  - Only the server can set payout accounts or record orders.
-- **Payments backend:** the checkout endpoint takes only a product ID and reads the price and payout account from the database. A signed Stripe webhook records each sale exactly once.
+- Sign up and sign in with Firebase Auth
+- Create listings with a photo, and edit or delete them from your dashboard
+- Browse the newest listings, 12 at a time
+- Dashboard with active listings, items sold and earnings
+- Shareable listing links (`product_listing_page.html?id=...`) that stay readable after the item sells
+- Secure by default: Firestore rules validate every write (listings and profiles), images must come from Cloudinary, and user content is never rendered as HTML
+- Payments backend with server-side pricing, a unit reservation per checkout, verified Stripe webhooks, automatic refunds for oversold items, and Stripe Connect seller onboarding
 
 ## Status
 
-This is a portfolio project, not a live marketplace.
+This is a portfolio project, not a live marketplace:
 
-- **Online payments aren't switched on.** The backend is built and tested, but buyers have no pay button yet and sellers have no Stripe onboarding, so "Buy now" leads to a contact form. Don't use this to take real money.
-- **The home page shows sample listings,** labelled as samples. They aren't loaded from Firestore.
+- **Online payments aren't switched on yet.** The backend is complete and tested (checkout, seller onboarding with Stripe Connect, reservations, refunds and result pages), but the listing page still shows "Contact seller", which opens a message form that is a preview and doesn't send yet. Switching payments on means deploying the backend, setting `UNIVBID_CONFIG.stripeApiUrl` on the site and replacing that button.
+- **The home page shows sample listings,** labelled as samples.
 - **There's no bidding,** despite the name.
 
 ## Tech stack
@@ -31,149 +28,142 @@ This is a portfolio project, not a live marketplace.
 |---|---|
 | Frontend | HTML, CSS, vanilla JavaScript modules (no build step) |
 | Auth and data | Firebase Auth, Cloud Firestore |
-| Images | Cloudinary (unsigned upload preset) |
+| Images | Cloudinary |
 | Backend | Node.js 22, Express 5, Firebase Admin SDK |
-| Payments | Stripe Checkout with Connect destination charges |
-| Webhooks | [`@efrata/hookguard`](https://github.com/AbayleE/hookGuard) for signature verification |
+| Payments | Stripe Checkout, [`@efrata/hookguard`](https://github.com/AbayleE/hookGuard) for webhooks |
 | Tests | Node's built-in test runner, jsdom |
 
-## Project structure
+## Start the app
 
-```text
-UnivBid/
-├── *.html                    Pages (index, sign_in, dashboard, sales_page, ...)
-├── firebase.js               Firebase client setup
-├── Scripts/
-│   ├── components/           Listing cards, auth and profile widgets
-│   ├── pages/                One script per page
-│   └── services/             Firestore calls, prices, uploads, notifications
-├── Styles/                   Stylesheets
-├── Images/                   Static images
-├── stripe-backend/
-│   ├── config/               Environment checks, Firebase Admin and Stripe clients
-│   ├── controllers/          Checkout and webhook handlers
-│   ├── middleware/           Firebase ID token check
-│   ├── routes/               API routes and rate limiting
-│   └── scripts/              One-off data migrations
-├── tests/                    Backend and frontend tests
-├── firestore.rules           Security rules
-├── firestore.indexes.json    Composite indexes
-└── firebase.json             Firebase deploy configuration
-```
+You need [Node.js 22.3+](https://nodejs.org) and [Python 3](https://www.python.org).
 
-## Run locally
+1. Get the code and install dependencies:
+   ```bash
+   git clone https://github.com/AbayleE/UnivBid.git
+   cd UnivBid
+   npm install
+   ```
+2. Check everything works. All tests should pass:
+   ```bash
+   npm test
+   ```
+3. Start the website:
+   ```bash
+   python -m http.server 8000
+   ```
+4. Open [http://localhost:8000](http://localhost:8000).
+5. Click **Sign Up** to create an account. You can then create listings, browse and use the dashboard.
 
-You need **Node.js 22.3 or later**.
+Press `Ctrl+C` in the terminal to stop the server.
 
-```bash
-git clone https://github.com/AbayleE/UnivBid.git
-cd UnivBid
-npm install
-npm test
-```
+Notes:
+- **Use the server.** Opening the HTML files directly by double-clicking won't work, because browsers block JavaScript modules loaded from files.
+- **Live database:** the site uses the live Firebase project set in `firebase.js`, so anything you create is saved there. To use your own project, replace that config and deploy the rules and indexes (see Deploy).
 
-### Frontend
+## Start the payments backend (optional)
 
-Serve the repository root with any static server, then open the printed address:
+You only need this to work on payments.
 
-```bash
-python -m http.server 8000
-```
+1. Create `stripe-backend/.env`, using your Stripe test keys:
+   ```text
+   STRIPE_SK=sk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   DOMAIN=http://localhost:8000
+   FIREBASE_PROJECT_ID=bidsphere-a55b1
+   ```
+   Optional settings and their defaults:
+   ```text
+   STRIPE_CONNECT_WEBHOOK_SECRET=whsec_...   # enables /api/stripe/connect/webhook
+   PLATFORM_FEE_PERCENT=5                     # share of each sale kept by the platform
+   PLATFORM_FEE_MIN_CENTS=50                  # floor for the fee; never the whole price
+   CURRENCY=eur
+   NODE_ENV=production                        # hides error details in responses
+   ```
+2. Sign in to Google Cloud so the backend can reach Firestore:
+   ```bash
+   gcloud auth application-default login
+   ```
+3. Start the backend on port 5000:
+   ```bash
+   npm start
+   ```
+4. To receive Stripe webhooks, run this in a second terminal. Put the `whsec_...` value it prints into `STRIPE_WEBHOOK_SECRET`, then restart `npm start`:
+   ```bash
+   stripe listen --forward-to localhost:5000/api/stripe/webhook --events checkout.session.completed,checkout.session.expired,charge.refunded,charge.dispute.created
+   ```
+   For seller onboarding, forward Connect events to the second endpoint in a third terminal and put its secret into `STRIPE_CONNECT_WEBHOOK_SECRET`:
+   ```bash
+   stripe listen --forward-connect-to localhost:5000/api/stripe/connect/webhook --events account.updated
+   ```
 
-The VS Code Live Server extension also works (this repo sets it to port 5502).
+The backend has two endpoints:
 
-The frontend connects to the real Firebase project in `firebase.js`, so **anything you create locally is saved to that project's live database.** To use your own project, replace the config in `firebase.js` and deploy the rules and indexes to it (see Deploy).
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/stripe/create-checkout-session` | Needs a Firebase ID token and `{ "productId": "..." }`. The price and seller account are read from Firestore, never from the request. Reserves one unit for the length of the session. |
+| `POST /api/stripe/connect/onboard` | Creates the seller's Stripe Express account on first use and returns a fresh onboarding link. |
+| `GET /api/stripe/connect/status` | Asks Stripe whether the seller can accept payments. `connect_return.html` calls it. |
+| `POST /api/stripe/webhook` | Records each paid order once, consumes the reservation and updates the listing's quantity. Refunds a payment for an item that was sold meanwhile. Releases reservations on expiry and marks refunded or disputed orders. Requests without a valid Stripe signature get a 401. |
+| `POST /api/stripe/connect/webhook` | `account.updated` events, with their own signing secret. Updates whether the seller can be paid. Mounted only when the secret is set. |
 
-### Backend (optional)
-
-You only need the backend to work on payments. Create `stripe-backend/.env`:
-
-```text
-STRIPE_SK=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-DOMAIN=http://localhost:8000
-FIREBASE_PROJECT_ID=bidsphere-a55b1
-```
-
-Give the backend Google credentials using one of these:
-- **Recommended:** run `gcloud auth application-default login` once.
-- **Or:** set `GOOGLE_APPLICATION_CREDENTIALS` to a service account key stored outside the repo.
-
-Then run:
-
-```bash
-npm start                 # or: npm run dev   (restarts on changes)
-```
-
-The server stops with a clear message if a required variable is missing.
-
-`@efrata/hookguard` is installed from `vendor/efrata-hookguard-0.1.0-beta.0.tgz`, the same file `npm publish` uploads. Once the beta is on npm, switch to it and delete the `vendor/` folder:
-
-```bash
-npm install @efrata/hookguard@beta
-```
-
-To receive Stripe webhooks locally, run this in a second terminal and copy the printed `whsec_...` value into `STRIPE_WEBHOOK_SECRET`:
-
-```bash
-stripe listen --forward-to localhost:5000/api/stripe/webhook --events checkout.session.completed
-```
-
-### API
-
-| Endpoint | Auth | Purpose |
-|---|---|---|
-| `POST /api/stripe/create-checkout-session` | `Authorization: Bearer <Firebase ID token>` | Body `{ "productId": "..." }`. Reads the price from `products/{id}` and the payout account from the seller's `users/{uid}.sellerStripeAccountId`. Limited to 10 requests per minute per user. |
-| `POST /api/stripe/webhook` | Stripe signature, checked by [HookGuard](https://github.com/AbayleE/hookGuard) | Forged, altered or replayed requests get a 401. On a paid `checkout.session.completed`, creates `orders/{sessionId}` and reduces the listing's quantity. A listing is marked `Sold` at zero. If the item was already gone, the order is saved as `needs_refund` for a manual refund. |
+Every endpoint is rate limited per IP, and the authenticated ones per user as well. Webhook events are claimed once in the `webhook_events` collection, so retries and parallel instances cannot process an event twice.
 
 ## Deploy
 
-The site deploys to **Firebase Hosting**. The backend is optional until payments are switched on.
-
-Install the Firebase CLI and sign in once:
+The website goes to Firebase Hosting. Install the Firebase CLI once:
 
 ```bash
 npm install -g firebase-tools
 firebase login
 ```
 
-Run these steps in order, because each step depends on the one before:
+Then run these steps in order:
 
-1. **Indexes.** Browse needs the index, so wait until it shows as *Enabled* in the Firebase console before going on:
+1. **Indexes.** Wait until the index shows as *Enabled* in the Firebase console before continuing:
    ```bash
    firebase deploy --only firestore:indexes
    ```
-2. **Site.** The site appears at `https://bidsphere-a55b1.web.app`:
+2. **Website.** It will be live at `https://bidsphere-a55b1.web.app`:
    ```bash
    firebase deploy --only hosting
    ```
-3. **Price migration.** Older listings store prices as text. This step converts them to numbers. It uses the backend credentials above. Check the dry run's output before adding `--apply`:
+3. **Price migration** (one time). Converts old text prices to numbers. It needs the backend setup above. Check the dry run's output before adding `--apply`:
    ```bash
    node stripe-backend/scripts/migrate_prices.js
    node stripe-backend/scripts/migrate_prices.js --apply
    ```
-4. **Rules.** Deploy them last: they reject listings with text prices, which the old site still sends. Test them in the console's Rules Playground first:
+4. **Security rules.** Test them in the Firebase console's Rules Playground first. The rules now validate profile fields too, so a profile missing a field will fail to update until it is saved from the profile page once:
    ```bash
    firebase deploy --only firestore:rules
    ```
+5. **Firestore TTL.** In the Firebase console, add a time-to-live policy on `webhook_events` using the `expiresAt` field, so processed webhook claims are cleaned up after 30 days.
 
-**Firebase Auth** already allows the `web.app` and `firebaseapp.com` domains. If you add a custom domain, add it under **Authentication > Settings > Authorized domains**.
+The backend only needs deploying once payments are switched on. Google Cloud Run works well, because it can reach Firestore without a key file.
 
-### Backend (when payments are ready)
+## Project structure
 
-Google Cloud Run is the simplest option, because it runs inside your Firebase project and gets Firestore access without a key file:
-
-```bash
-gcloud run deploy univbid-api --source . --region europe-west1 \
-  --set-env-vars DOMAIN=https://bidsphere-a55b1.web.app,FIREBASE_PROJECT_ID=bidsphere-a55b1 \
-  --set-secrets STRIPE_SK=stripe-sk:latest,STRIPE_WEBHOOK_SECRET=stripe-webhook-secret:latest
+```text
+*.html                 Pages
+firebase.js            Firebase client setup
+Scripts/               Page scripts, components and services
+Styles/                Stylesheets
+Images/                Static images
+stripe-backend/        Express API, webhook handler and migration script
+tests/                 Backend and frontend tests
+vendor/                HookGuard package, until it's published to npm
+firestore.rules        Security rules
+firestore.indexes.json Database indexes
+firebase.json          Firebase deploy configuration
 ```
 
-Store both Stripe values in Secret Manager first. In the Stripe Dashboard, under **Developers > Webhooks**, add `https://<your-cloud-run-url>/api/stripe/webhook` with the `checkout.session.completed` event, and use that endpoint's signing secret.
+## Roadmap
 
-## What's next
-
-[codebase-analysis-docs/portfolio_next_steps.md](codebase-analysis-docs/portfolio_next_steps.md) lists the remaining work in priority order. The full security and quality audit behind it is in [codebase-analysis-docs/firebase_app_audit.md](codebase-analysis-docs/firebase_app_audit.md).
+- Online payments: the pay button on the listing page, and deploying the backend. Onboarding, reservations, refunds and the result pages are done.
+- Enforce email verification: a verification email is sent at sign-up; the rule that requires it before listing is one line once existing accounts have verified
+- Seller messaging, so "Contact seller" actually reaches the seller
+- Bidding: an `auctions` collection with a server-side bid endpoint
+- Continuous integration and Firestore rules tests against the emulator
+- A sweep for reservations whose `checkout.session.expired` webhook never arrived
 
 ## License
 
