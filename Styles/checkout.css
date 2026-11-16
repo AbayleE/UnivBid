@@ -1,71 +1,35 @@
-body {
-    background-color: var(--color-light-background);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-  }
+/* "Contact the seller" page layout. */
 
-  .contact-container {
-    background-color: var(--color-background);
-    padding: var(--gap-base);
-    margin-top: 200px;
-    border-radius: var(--gap-small);
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    width: 400px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+.contact-seller { display: grid; gap: var(--space-5); }
 
-  h2 {
-    margin-top: var(--gap-tiny);
-    margin-bottom: var(--gap-base);
-    text-align: center;
-  }
-
-  .product-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: var(--gap-base);
-  }
-
-  .product-info img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    margin-right: var(--gap-small);
-    border-radius: var(--gap-tiny);
-  }
-
-  .contact-form label {
-    display: block;
-    margin: var(--gap-small)0  var(--gap-tiny);
-    font-size: var(--font-size-small);
-    color: var(--color-text-primary);
-  }
-
-  .contact-form input,
-  .contact-form textarea {
-    width: 100%;
-    padding: var(--gap-tiny);
-    margin-bottom: var(--gap-small);
-    border: 1px solid #ccc;
-    border-radius: var(--gap-tiny);
+.product-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
 }
 
-  .contact-form button {
-    width: 100%;
-    padding: var(--gap-small);
-    background-color: var( --color-accent);
-    color: white;
-    font-weight: bold;
-    border: none;
-    border-radius:var(--gap-tiny);
-    cursor: pointer;
+.product-info img {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
 
-  }
+.product-info p { margin: 0; }
 
-  .contact-form button:hover {
-    background-color: #218838;
-  }
+.product-info-name {
+  font-weight: var(--fw-semibold);
+  overflow-wrap: anywhere;
+}
+
+.product-info-price {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.inquiry-status:not(:empty) { margin-top: var(--space-5); }
