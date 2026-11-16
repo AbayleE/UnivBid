@@ -4,72 +4,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0e1318">
+    <meta name="description" content="Create a UnivBid account.">
     <title>Create an account | UnivBid</title>
-    <link rel="stylesheet" href="Styles/style_sign.css">
-    <link rel="stylesheet" href="Styles/main.css">
-    <link rel="stylesheet" href="Styles/portfolio.css">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="modulepreload" href="firebase.js">
+    <link rel="modulepreload" href="Scripts/services/api.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js">
+    <link rel="stylesheet" href="Styles/main.css">
+    <link rel="stylesheet" href="Styles/style_sign.css">
 </head>
 
 <body>
-    <div class="main-container ">
-        <img src="Images/logo-transparent_.png" alt="UnivBid" class="logo">
-        <div class="form-container signUP">
-            <h2>Create Your Account</h2>
-            <p style="margin-bottom: 24px; font-size:14px">Join your campus community on UnivBid</p>
-            <form id="sign_upform">
-                <div class="input-group-flex">
-                    <div class="input-group">
-                        <label for="Fname">First Name: </label>
-                        <input type="text" id="Fname" name="firstName" placeholder="John" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="Lname">Last Name: </label>
-                        <input type="text" id="Lname" name="lastName" placeholder="Doe" required>
-                    </div>
-                </div>
+    <a class="skip-link" href="#main">Skip to main content</a>
 
-                <div class="input-group-flex">
-                    <div class="input-group">
-                        <label for="university">University: </label>
-                        <input type="text" id="university" name="university" placeholder="University name">
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label for="email">Email address: </label>
-                    <input type="email" id="email" name="email" placeholder="name@university.edu"
-                        required>
-                    <!-- <small style="font-size:x-small"><i>Use your Univeristy email address for verification
-                        </i></small> -->
-                </div>
-
-                <div class="input-group-flex">
-                    <div class="input-group">
-                        <label for="password">Password: </label>
-                        <input type="password" id="password" name="password" minlength="8" placeholder="🔒 Password"
-                            required>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="confirm-password">Confirm Password: </label>
-                    <input type="password" id="confirm-password" name="confirm-password" placeholder="🔒 Password"
-                        required>
-                </div>
-                <button type="submit" class="btn-primary" id="submit">Create Account</button>
-            </form>
-            <p>Already have an account? <a href="sign_in.html">Sign In</a></p>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="index.html">
+                <img src="Images/logo-transparent_.png" alt="UnivBid home" width="132" height="26">
+            </a>
+            <a class="btn btn-ghost" href="index.html"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to home</a>
         </div>
-    </div>
+    </header>
+
+    <main id="main" class="auth-page">
+        <div class="card auth-card auth-card-wide">
+            <h1>Create your account</h1>
+            <p class="muted">Join your campus community on UnivBid.</p>
+
+            <form id="sign_upform" novalidate>
+                <div class="form-section">
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="Fname">First name</label>
+                            <input type="text" id="Fname" name="firstName" autocomplete="given-name" required aria-describedby="Fname-error">
+                            <p class="field-error" id="Fname-error"></p>
+                        </div>
+                        <div class="field">
+                            <label for="Lname">Last name</label>
+                            <input type="text" id="Lname" name="lastName" autocomplete="family-name" required aria-describedby="Lname-error">
+                            <p class="field-error" id="Lname-error"></p>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="university">University <span class="required-mark">(optional)</span></label>
+                        <input type="text" id="university" name="university" autocomplete="organization">
+                    </div>
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required aria-describedby="email-error">
+                        <p class="field-error" id="email-error"></p>
+                    </div>
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <p class="field-hint" id="password-hint">At least 8 characters.</p>
+                        <div class="password-wrap">
+                            <input type="password" id="password" name="password" minlength="8" autocomplete="new-password" required aria-describedby="password-hint password-error">
+                            <button type="button" class="password-toggle" data-password-toggle aria-controls="password" aria-pressed="false" aria-label="Show password">Show</button>
+                        </div>
+                        <p class="field-error" id="password-error"></p>
+                    </div>
+                    <div class="field">
+                        <label for="confirm-password">Confirm password</label>
+                        <div class="password-wrap">
+                            <input type="password" id="confirm-password" name="confirm-password" autocomplete="new-password" required aria-describedby="confirm-password-error">
+                            <button type="button" class="password-toggle" data-password-toggle aria-controls="confirm-password" aria-pressed="false" aria-label="Show confirm password">Show</button>
+                        </div>
+                        <p class="field-error" id="confirm-password-error"></p>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block auth-submit" id="submit">Create account</button>
+            </form>
+
+            <p class="auth-switch">Already have an account? <a href="sign_in.html">Sign in</a></p>
+        </div>
+    </main>
+
+    <footer class="site-footer site-footer-slim">
+        <div class="container footer-bottom">
+            <p>&copy; 2026 UnivBid. Student marketplace prototype.</p>
+            <p><a href="contact.html">Contact</a></p>
+        </div>
+    </footer>
+
     <div id="global-notification" class="notification hidden">
         <div class="notification-content">
             <span id="notification-message"></span>
-            <button class="notification-close">&times;</button>
+            <button type="button" class="notification-close" aria-label="Close notification">&times;</button>
         </div>
     </div>
+
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="Scripts/pages/sign_up.js"></script>
+    <script type="module" src="Scripts/components/nav.js"></script>
 </body>
-<script type="module" src="Scripts/pages/sign_up.js" defer></script>
-<script type="module" src="firebase.js" defer></script>
 
 </html>
