@@ -2,6 +2,8 @@ import {
     auth,
     db,
     signOut,
+    deleteUser,
+    sendEmailVerification,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     onAuthStateChanged,
@@ -38,32 +40,65 @@ export const logoutuser = async () => {
 };
 
 
-export const registerUser = async (First_name, Last_name, email, password, phone = "", university = "", avatar = "", contact_choice = {
-    contact_email: true,
-    contact_phone: false,
-}) => {
-    const full_name = First_name + Last_name;
-    const url_avatar = `https://robohash.org/${full_name}.png?size=200x200`;
+export const registerUser = async (
+    First_name,
+    Last_name,
+    email,
+    password,
+    phone = "",
+    university = "",
+    avatar = "",
+    contact_choice = {
+        contact_email: true,
+        contact_phone: false,
+    }
+) => {
+    const full_name = `${(First_name || '').trim()} ${(Last_name || '').trim()}`.trim();
+    const url_avatar = avatar || `https://robohash.org/${encodeURIComponent(full_name || email)}.png?size=200x200`;
+
+    let user = null;
+
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        user = userCredential.user;
         const userData = {
-            email: email,
-            firstName: First_name,
-            lastName: Last_name,
+            email,
+            firstName: First_name.trim(),
+            lastName: Last_name.trim(),
             UserID: user.uid,
             phone,
             university,
-            avatar:url_avatar,
+            avatar: url_avatar,
             contact_choice,
         };
 
         const docRef = doc(db, "users", user.uid);
         await setDoc(docRef, userData);
+        // Verification is advisory for now. Once every account has verified,
+        // the Firestore rules can require email_verified to create listings.
+        try {
+            await sendEmailVerification(user);
+        } catch (error) {
+            console.error("Could not send the verification email:", error.message);
+        }
         return { success: true, user };
     } catch (error) {
         console.error("Error creating user:", error.message);
+        if (user) await rollbackRegistration(user);
         return { success: false, error: error.code };
+    }
+};
+
+// Removes the Auth account when its profile could not be saved, so the email
+// can be registered again.
+const rollbackRegistration = async (user) => {
+    try {
+        await deleteUser(user);
+    } catch (error) {
+        console.error("Error rolling back user:", error.message);
+        await signOut(auth).catch((signOutError) => {
+            console.error("Error signing out user:", signOutError.message);
+        });
     }
 };
 
@@ -78,3 +113,16 @@ export const signinUser = async (email, password) => {
     }
 };
 
+
+// Where to go after signing in. Only a relative page on this site is
+// accepted, so a crafted link cannot send people elsewhere.
+export const safeNext = (value, fallback = "dashboard.html") => {
+    if (typeof value !== "string" || !/^[A-Za-z0-9_]+\.html(\?[A-Za-z0-9_=&%.-]*)?$/.test(value)) return fallback;
+    return value;
+};
+
+// Builds the sign-in link that returns to the current page.
+export const signInUrl = () => {
+    const here = window.location.pathname.split("/").pop() + window.location.search;
+    return `sign_in.html?next=${encodeURIComponent(here)}`;
+};

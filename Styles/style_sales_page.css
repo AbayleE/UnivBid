@@ -1,18 +1,5 @@
-.body_right {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 5%;
-    left: 8%;
-    width: 90%;
-    height: 100vh;
-    color: var(--color-secondary);
-}
+/* Browse page layout. Cards, grid, skeletons and states are in main.css. */
 
+.browse-notice { margin-bottom: var(--space-5); }
 
-
-
-
-
+.toolbar .search_bar { flex: 1 1 280px; }

@@ -2,75 +2,146 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact</title>
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Merriweather:wght@400;700&display=swap">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="Styles/main.css">
-  <link rel="stylesheet" href="Styles/contact.css">
-
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0e1318">
+    <meta name="description" content="Send the UnivBid team a question or feedback.">
+    <title>Contact | UnivBid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="modulepreload" href="firebase.js">
+    <link rel="modulepreload" href="Scripts/services/api.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js">
+    <link rel="stylesheet" href="Styles/main.css">
+    <link rel="stylesheet" href="Styles/contact.css?v=2">
 </head>
 
 <body>
-  <nav class="main-header-nav">
-     <img src="../Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
-    <div class="link-navbar">
-      <a href="#" aria-label="Home UnivBid">Home</a>
-      <a href="career.html" aria-label="Career Opportunities">Career</a>
-      <a href="#about" aria-label="About UnivBid">About</a>
-      <a href="contact.html" aria-label="Contact Us">Contact</a>
-      <button class="register_btn"> GET STARTED </button>
-    </div>
-  </nav>
+    <a class="skip-link" href="#main">Skip to main content</a>
 
-  <div id="main_content">
-
-    <div class="left_wrapper">
-      <div class="title">
-        <h1>Contact Us Form</h1>
-        <p>Need to get in touch with us? Either Fill out the form with your inquiry or find our social media feed below.
-        </p>
-      </div>
-    </div>
-
-    <div class="wrapper">
-      <h1>Get In Touch</h1>
-      <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
-        <input type="hidden" name="access_key" value="fc4f6852-5542-4678-b530-883ff502eb67">
-        <div class="input-fields">
-          <input type="text" class="input" name="name" placeholder="Name" required>
-          <input type="text" class="input" name="email" placeholder="Email Address" required>
-          <input type="text" class="input" name="phone" placeholder="Phone">
-          <textarea placeholder="Message" name="message" required class="input"></textarea>
-          <button class="send_btn" type="submit">Send</button>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="index.html">
+                <img src="Images/logo-transparent_.png" alt="UnivBid home" width="132" height="26">
+            </a>
+            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+                <i class="fa-solid fa-bars icon-open" aria-hidden="true"></i><i class="fa-solid fa-xmark icon-close" aria-hidden="true"></i>
+                Menu
+            </button>
+            <div class="site-menu" id="site-menu">
+                <nav aria-label="Main">
+                    <ul class="nav-list">
+                        <li><a href="sales_page.html"><i class="fa-solid fa-store" aria-hidden="true"></i>Browse</a></li>
+                        <li><a href="index.html#how-it-works"><i class="fa-solid fa-circle-question" aria-hidden="true"></i>How it works</a></li>
+                        <li><a href="career.html"><i class="fa-solid fa-book-open" aria-hidden="true"></i>Our story</a></li>
+                        <li><a href="contact.html"><i class="fa-solid fa-envelope" aria-hidden="true"></i>Contact</a></li>
+                    </ul>
+                </nav>
+                <div class="header-actions">
+                    <a class="btn btn-ghost login_btn" href="sign_in.html">Sign in</a>
+                    <a class="btn btn-primary register_btn" href="sign_up.html">Sign up</a>
+                </div>
+            </div>
         </div>
-      </form>
+    </header>
+
+    <main id="main" class="page">
+        <div class="container contact-layout">
+            <div class="contact-intro">
+                <span class="eyebrow">Contact</span>
+                <h1>Let's talk UnivBid.</h1>
+                <p class="muted">Have a question or feedback about this student marketplace concept? Send a note and we'll get back to you.</p>
+                <ul class="contact-points" role="list">
+                    <li><i class="fa-solid fa-envelope" aria-hidden="true"></i> <a href="mailto:univbid.contact@gmail.com">univbid.contact@gmail.com</a></li>
+                    <li><i class="fa-solid fa-circle-info" aria-hidden="true"></i> <span>Looking for a seller? Open the listing and choose <strong>Contact seller</strong>.</span></li>
+                </ul>
+            </div>
+
+            <div class="card contact-card">
+                <h2>Send us a message</h2>
+                <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+                    <input type="hidden" name="access_key" value="fc4f6852-5542-4678-b530-883ff502eb67">
+                    <div class="form-section">
+                        <div class="form-row">
+                            <div class="field">
+                                <label for="contact-name">Name</label>
+                                <input type="text" id="contact-name" name="name" autocomplete="name" required>
+                            </div>
+                            <div class="field">
+                                <label for="contact-email">Email</label>
+                                <input type="email" id="contact-email" name="email" autocomplete="email" required>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="contact-phone">Phone <span class="required-mark">(optional)</span></label>
+                            <input type="tel" id="contact-phone" name="phone" autocomplete="tel">
+                        </div>
+                        <div class="field">
+                            <label for="contact-message">Message</label>
+                            <textarea id="contact-message" name="message" rows="6" required></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary btn-lg send_btn" type="submit"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Send message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="Images/logo-transparent_.png" alt="UnivBid" width="122" height="24">
+                    <p>A student marketplace prototype for listing and finding campus essentials.</p>
+                </div>
+                <nav class="footer-col" aria-labelledby="footer-marketplace">
+                    <h2 id="footer-marketplace">Marketplace</h2>
+                    <ul>
+                        <li><a href="sales_page.html">Browse listings</a></li>
+                        <li><a href="create_auction.html">Sell an item</a></li>
+                        <li><a href="shopping_list.html">Saved items</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                    </ul>
+                </nav>
+                <nav class="footer-col" aria-labelledby="footer-project">
+                    <h2 id="footer-project">Project</h2>
+                    <ul>
+                        <li><a href="index.html#how-it-works">How it works</a></li>
+                        <li><a href="index.html#status">Prototype status</a></li>
+                        <li><a href="career.html">Our story</a></li>
+                    </ul>
+                </nav>
+                <div class="footer-col">
+                    <h2>Contact</h2>
+                    <ul>
+                        <li><a href="contact.html">Contact form</a></li>
+                        <li><a href="mailto:univbid.contact@gmail.com">univbid.contact@gmail.com</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 UnivBid. Student marketplace prototype.</p>
+                <p>Online payments aren't switched on yet.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="global-notification" class="notification hidden">
+        <div class="notification-content">
+            <span id="notification-message"></span>
+            <button type="button" class="notification-close" aria-label="Close notification">&times;</button>
+        </div>
     </div>
 
-    
-
-  </div>
-
-  <div id="image_background">
-    <img src="Images/12.png" alt="" width="250">
-
-  </div>
-
-  <div id="global-notification" class="notification hidden">
-    <div class="notification-content">
-      <span id="notification-message"></span>
-      <button class="notification-close">&times;</button>
-    </div>
-  </div>
-
-  
-  
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="Scripts/pages/home_page.js"></script>
+    <script type="module" src="Scripts/components/nav.js"></script>
 </body>
-
-<script type="module" src="Scripts/pages/home_page.js" defer></script>
-<script type="module" src="firebase.js" defer></script>
 
 </html>

@@ -1,218 +1,164 @@
-import { profileLoad } from '../components/AuthModal.js';
+import { ProfilePicture, profileLoad } from '../components/AuthModal.js';
+import { createField, makeInput } from '../components/form.js';
+import { el, icon } from '../components/listingMeta.js';
+import { updateuserProfile } from '../services/api.js';
+import { showNotification } from '../services/notifications.js';
+
 document.addEventListener("DOMContentLoaded", function () {
+    new ProfilePicture(document.getElementById("profile_pic"));
 
-    const body = document.body;
+    const host = document.getElementById("profile-root") || document.querySelector("main") || document.body;
 
-    document.getElementById("add_product_btn").addEventListener("click", function () {
-        window.location.href = "create_auction.html";
+    const layout = el('div', 'profile-layout');
+
+    // ---------- Sidebar: identity card + shortcuts ----------
+    const aside = el('aside', 'card profile-summary');
+    aside.setAttribute('aria-label', 'Profile summary');
+
+    const identity = el('div', 'profile-identity');
+    const avatar = el('img', 'profile-avatar');
+    avatar.src = 'Images/11.png';
+    avatar.alt = 'Your profile picture';
+    avatar.width = 64;
+    avatar.height = 64;
+    const meta = el('div', 'profile-meta');
+    const displayName = el('p', 'profile-name', 'Your account');
+    const displayEmail = el('p', 'profile-email', '');
+    meta.append(displayName, displayEmail);
+    const changeAvatar = el('button', 'btn btn-secondary btn-sm profile-avatar-btn');
+    changeAvatar.type = 'button';
+    changeAvatar.append(icon('fa-arrows-rotate'), 'Change avatar');
+    identity.append(avatar, meta, changeAvatar);
+
+    const linksNav = el('nav', 'profile-nav');
+    linksNav.setAttribute('aria-labelledby', 'profile-nav-title');
+    const navTitle = el('p', 'profile-nav-title', 'Shortcuts');
+    navTitle.id = 'profile-nav-title';
+    const links = el('ul', 'nav-list profile-links');
+    [
+        ['dashboard.html', 'fa-chart-line', 'Your dashboard'],
+        ['create_auction.html', 'fa-plus', 'Sell an item'],
+        ['shopping_list.html', 'fa-bookmark', 'Saved items'],
+    ].forEach(([href, iconName, text]) => {
+        const li = el('li');
+        const a = el('a');
+        a.href = href;
+        a.append(icon(iconName), el('span', '', text), icon('fa-chevron-right'));
+        li.append(a);
+        links.append(li);
+    });
+    linksNav.append(navTitle, links);
+    aside.append(identity, linksNav);
+
+    // Avatars are generated images; "Change avatar" saves a fresh one.
+    changeAvatar.addEventListener('click', async () => {
+        const seed = (crypto.randomUUID?.() || String(Date.now() + Math.random())).slice(0, 12);
+        const url = `https://robohash.org/${encodeURIComponent(seed)}.png?size=200x200`;
+        changeAvatar.disabled = true;
+        changeAvatar.setAttribute('aria-busy', 'true');
+        const result = await updateuserProfile({ avatar: url });
+        if (result.success) {
+            avatar.src = url;
+            const headerPic = document.getElementById("profile_pic");
+            if (headerPic) headerPic.src = url;
+            showNotification("Avatar updated.", 'success');
+        } else {
+            showNotification(`Couldn't update your avatar: ${result.error}`, 'error');
+        }
+        changeAvatar.disabled = false;
+        changeAvatar.removeAttribute('aria-busy');
     });
 
-
-    const content_left = document.createElement("div");
-    content_left.classList.add("body_left");
-
-    const pages_container = document.createElement("div");
-    pages_container.classList.add("pages_container");
-
-    const pages = ["Home","My Dashboard", "Product Sale", "Support", "Account", "Sign Out"];
-    const page_link = ["index.html","Dashboard.html", "sales_page.html", "contact.html", "profile.html", "index.html"];
-    const icons = ["fa-house","fa-chart-line", "fa-store", "fa-headset", "fa-user", "fa-sign-out"];
-
-
-    pages.forEach((page, indx) => {
-        const links = document.createElement('a');
-        links.href = page_link[indx];
-
-        const icon = document.createElement("i");
-        icon.classList.add("fa-solid", icons[indx]);
-
-        const span_text = document.createElement("span");
-        span_text.textContent = " " + page;
-       
-
-        links.appendChild(icon);
-        links.appendChild(span_text);
-        pages_container.appendChild(links);
-
-    });
-
-    content_left.appendChild(pages_container);
-    body.appendChild(content_left);
-
-    // Content-Right
-
-    const content_right = document.createElement("div");
-    content_right.classList.add("content_right");
-
-    const header_profile = document.createElement("div");
-    header_profile.classList.add("header_profile");
-
-    const header_profile_title = document.createElement("h4");
-    header_profile_title.classList.add("header_profile_title");
-    header_profile_title.innerText = " User Profile";
-
-    const header_profile_sub_title = document.createElement("p");
-    header_profile_sub_title.classList.add("header_profile_sub_title");
-    header_profile_sub_title.innerHTML = 'Manage your profile, update your information, and track your activity on <span style="color:red">UnivBid</span>.';
-
-    header_profile_title.appendChild(header_profile_sub_title);
-    header_profile.appendChild(header_profile_title);
-    content_right.appendChild(header_profile);
-
-    // Profile Container
-
-    const card_container = document.createElement("div");
-    card_container.classList.add("card_container");
-
-    const card_column = document.createElement("div");
-    card_column.classList.add("card_column");
-
-    const card_profile_left = document.createElement("div");
-    card_profile_left.classList.add("card_block");
-
-    const card_profile_pic = document.createElement("div");
-    card_profile_pic.classList.add("card_profile_pic");
-    card_profile_left.appendChild(card_profile_pic);
-
-    const card_contact_activity = document.createElement("div");
-    card_contact_activity.classList.add("card_block");
-
-    const header_card_contact_activity = document.createElement("h2");
-    header_card_contact_activity.innerText = "Contact Details";
-
-    card_contact_activity.appendChild(header_card_contact_activity);
-    const contact_choice = document.createElement("div");
-    contact_choice.classList.add("choice_block");
-    
-    const check_box_email = document.createElement("input");
-    check_box_email.type = "checkbox";
-    check_box_email.id = "check_box_email";
-    
-    const label_email = document.createElement("label");
-    label_email.setAttribute("for", "email");
-    label_email.innerText = "Email";
-    
-    const check_box_phone = document.createElement("input");
-    check_box_phone.type = "checkbox";
-    check_box_phone.id = "check_box_phone";
-    
-    const label_phone = document.createElement("label");
-    label_phone.setAttribute("for", "phone");
-    label_phone.innerText = "Phone";
-    
-    contact_choice.append(check_box_email, label_email, check_box_phone, label_phone);
-    card_contact_activity.appendChild(contact_choice);
-    
-    card_column.appendChild(card_profile_left);
-    card_column.appendChild(card_contact_activity);
-
-    const profile_info_div = document.createElement("div");
-    profile_info_div.classList.add("card_profile");
-
-    const profile_info_header_profile = document.createElement("h2");
-    profile_info_header_profile.innerText = "General Information";
-    profile_info_header_profile.style.paddingTop = "10px";
-
-    profile_info_div.appendChild(profile_info_header_profile);
-
-    const form = document.createElement("form");
+    // ---------- Settings card ----------
+    const card = el('div', 'card card_profile');
+    const form = el('form', 'profile-form');
     form.id = "profile-edit-form";
+    form.noValidate = true;
 
-    const name_container = document.createElement("div");
-    name_container.classList.add("flex-container");
+    const cardHead = el('div', 'profile-card-head');
+    cardHead.append(
+        el('h2', '', 'General information'),
+        el('p', '', 'This is what buyers see when they contact you about a listing.'),
+    );
 
-    const firstName_container = document.createElement("div");
-    firstName_container.classList.add("input-container");
-    const firstname_label = document.createElement("label");
-    firstname_label.setAttribute("for", "first-name");
-    firstname_label.innerText = "First Name:";
-    const firstNameinput = document.createElement("input");
-    firstNameinput.type = "text";
-    firstNameinput.id = "first-name";
-    firstNameinput.name = "first-name";
-    firstNameinput.required = true;
+    const section = (title) => {
+        const wrap = el('section', 'profile-section');
+        const heading = el('h3', 'profile-section-title', title);
+        wrap.append(heading);
+        return wrap;
+    };
+    const row = (...fields) => {
+        const r = el('div', 'form-row');
+        r.append(...fields.map(f => f.wrapper));
+        return r;
+    };
 
-    firstName_container.append(firstname_label, firstNameinput);
+    const first = createField({ id: 'first-name', label: 'First name', control: makeInput('text', { name: 'first-name', autocomplete: 'given-name' }) });
+    const last = createField({ id: 'last-name', label: 'Last name', control: makeInput('text', { name: 'last-name', autocomplete: 'family-name' }) });
+    const university = createField({ id: 'university', label: 'University', optional: true, control: makeInput('text', { name: 'university', autocomplete: 'organization' }) });
+    const email = createField({
+        id: 'email', label: 'Contact email',
+        hint: "Doesn't change the email you sign in with.",
+        control: makeInput('email', { name: 'email', autocomplete: 'email' }),
+    });
+    const phone = createField({ id: 'phone', label: 'Phone number', optional: true, control: makeInput('tel', { name: 'phone', autocomplete: 'tel' }) });
 
-    const lastName_container = document.createElement("div");
-    lastName_container.classList.add("input-container");
-    const lastname_label = document.createElement("label");
-    lastname_label.setAttribute("for", "last-name");
-    lastname_label.innerText = "Last Name:";
-    const lastNameinput = document.createElement("input");
-    lastNameinput.type = "text";
-    lastNameinput.id = "last-name";
-    lastNameinput.name = "last-name";
-    lastNameinput.required = true;
+    const personal = section('Personal details');
+    personal.append(row(first, last), university.wrapper);
 
-    lastName_container.append(lastname_label, lastNameinput);
-    name_container.append(firstName_container, lastName_container);
+    const contact = section('Contact details');
+    contact.append(row(email, phone));
 
-    const email_container = document.createElement("div");
-    email_container.classList.add("input-container", "full_container");
-    const email_label = document.createElement("label");
-    email_label.setAttribute("for", "email");
-    email_label.innerText = "Email:";
-    const emailinput = document.createElement("input");
-    emailinput.type = "email";
-    emailinput.name = "email";
-    emailinput.id = "email";
-    emailinput.required = true;
+    // Contact preferences
+    const choices = el('fieldset', 'choice_block');
+    choices.append(el('legend', '', 'How buyers can contact you'));
+    choices.append(el('p', 'field-hint', 'Saved to your profile for when seller messaging is switched on.'));
+    const checkGroup = el('div', 'choice_options');
+    choices.append(checkGroup);
+    const makeCheck = (id, text, iconName) => {
+        const label = el('label', 'check choice_pill');
+        const box = el('input');
+        box.type = 'checkbox';
+        box.id = id;
+        label.htmlFor = id;
+        label.append(box, icon(iconName), el('span', '', text));
+        checkGroup.append(label);
+        return box;
+    };
+    const check_box_email = makeCheck('check_box_email', 'Email', 'fa-envelope');
+    const check_box_phone = makeCheck('check_box_phone', 'Phone', 'fa-phone');
+    contact.append(choices);
 
-    email_container.append(email_label, emailinput);
-
-    const phone_container = document.createElement("div");
-    phone_container.classList.add("input-container", "full_container");
-    const phone_label = document.createElement("label");
-    phone_label.setAttribute("for", "phone");
-    phone_label.innerText = "Phone number:";
-    const phoneinput = document.createElement("input");
-    phoneinput.type = "tel";
-    phoneinput.id = "phone";
-    phoneinput.name = "phone";
-
-    phone_container.append(phone_label, phoneinput);
-
-
-    const university_container = document.createElement("div");
-    university_container.classList.add("input-container", "full_container");
-    const university_label = document.createElement("label");
-    university_label.setAttribute("for", "university");
-    university_label.innerHTML = "University:";
-    const universityinput = document.createElement("input");
-    universityinput.type = "text";
-    universityinput.id = "university";
-    universityinput.name = "university";
-
-    university_container.append(university_label, universityinput);
-
-    const submit_container = document.createElement("div");
-    submit_container.classList.add("full_container");
-    const submitButton = document.createElement("button");
+    const actions = el('div', 'form-actions');
+    const submitButton = el('button', 'btn btn-primary btn-lg', 'Save profile');
     submitButton.type = "submit";
-    submitButton.innerText = "Update Profile";
+    actions.append(submitButton);
 
-    submit_container.append(submitButton);
+    form.append(cardHead, personal, contact, actions);
+    card.append(form);
+    layout.append(aside, card);
+    host.append(layout);
 
-    form.append(name_container, email_container, phone_container, university_container);
-    profile_info_div.appendChild(form);
-    profile_info_div.appendChild( submit_container);
+    // Keep the sidebar's name and email in step with the form.
+    const syncIdentity = () => {
+        const name = `${first.control.value} ${last.control.value}`.trim();
+        displayName.textContent = name || 'Your account';
+        displayEmail.textContent = email.control.value.trim();
+        displayEmail.hidden = !displayEmail.textContent;
+    };
+    [first.control, last.control, email.control].forEach(c => c.addEventListener('input', syncIdentity));
+    syncIdentity();
 
+    const loader = new profileLoad(first.control, last.control, phone.control, email.control, university.control,
+        check_box_email, check_box_phone, submitButton, avatar);
+    const populate = loader.populateform.bind(loader);
+    loader.populateform = (data) => { populate(data); syncIdentity(); };
 
-    card_container.appendChild(card_column);
-    card_container.appendChild(profile_info_div);
-  
-
-
-    content_right.appendChild(card_container);
-    body.appendChild(content_right);
-
-    const profile_edit_form = document.querySelector(".card_profile form");
-    const firstNameInput = document.getElementById("first-name");
-    const lastNameInput = document.getElementById("last-name");
-    const phoneInput = document.getElementById("phone");
-    const emailInput = document.getElementById("email");
-    const uniInput = document.getElementById("university");
-
-    new profileLoad(firstNameInput,lastNameInput,phoneInput,emailInput,uniInput,check_box_email,check_box_phone,submitButton,card_profile_pic);
+    // ProfilePicture fills the header avatar; mirror it here when it loads.
+    const headerAvatar = document.getElementById("profile_pic");
+    if (headerAvatar && window.MutationObserver) {
+        new window.MutationObserver(() => {
+            if (headerAvatar.src && !headerAvatar.src.endsWith('Images/11.png')) avatar.src = headerAvatar.src;
+        }).observe(headerAvatar, { attributes: true, attributeFilter: ['src'] });
+    }
 });

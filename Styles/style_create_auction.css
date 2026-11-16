@@ -1,160 +1,25 @@
-.body{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; 
-    
-}
-.body_right {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: absolute;
-    top: 10%;
-    width: 100%;
-    height: 100vh;
-    gap:var(--gap-base);
-    color: var(--color-text-primary);
+/* Sell an item page. Fields, photo picker and errors are in main.css. */
+
+.listing-form .form-section + .form-section { margin-top: var(--space-5); }
+
+#create-listing > .error-summary { margin-bottom: var(--space-5); }
+
+.listing-form .check-list { margin-bottom: var(--space-2); }
+
+.listing-form .form-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin-inline: calc(-1 * var(--gutter));
+  padding: var(--space-4) var(--gutter);
+  background: linear-gradient(to top, var(--color-bg) 70%, transparent);
 }
 
-
-.return_link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  font-weight: 500;
-  color:var(--color-text-secondary);
-  font-size: var(--font-size-base);
-  position: relative;
-  top: 2%;
-  left: -40%;
-  /* margin: 0;
-  margin-right: 20px; */
-  cursor: pointer;
+@media (min-width: 600px) {
+  .listing-form .form-actions {
+    position: static;
+    margin-inline: 0;
+    padding: 0;
+    background: none;
+  }
 }
-
-.header_container{
-    padding:var(--gap-base);
-    /* margin:var(--gap-small); */
-}
-
-.header_container h1{
-    font-weight: bold;
-    color: var(--color-text-primary);
-    text-align: center;
-}
-
-.header_container p{
-   color: var(--color-text-primary);
-}
-
-.input_container{
-    background-color: var(--color-primary);
-    width: 80%;
-    display: flex;
-    flex-direction: column;
-    padding: var(--gap-large);
-    border: 1px solid hsl(0, 0%, 0%, 0.1);
-    border-radius: var(--border-radius);
-    box-shadow: inset 1px 1px 3px hsl(0, 0%, 0%,0.2);
-    gap:var(--gap-base);
-}
-
-.input_container h3{
-    font-weight: bold;
-    font-size: var(--font-size-medium);
-    color: var(--color-text-primary);
-}
-
-.input_container p{
-  margin-bottom: var(--gap-small);
-  font-size: var(--font-size-small);
-}
-
-
-.add_product_input_cont {
-    position: relative;
-    border-radius: var(--gap-small);
-    padding: var(--gap-tiny);
-    display: flex;
-    flex-direction: column;
-}
-
-
-.add_product_input_cont label {
-    color: var(--color-text-primary);
-    font-size: var(--font-size-small);
-    font-weight: bolder;
-    margin-bottom: var(--gap-tiny);
-    height: 15px;
-}
-
-.add_product_input_cont input,
-.add_product_input_cont select,
-.add_product_input_cont textarea{
-    padding: var(--gap-small);
-    border: 1px solid rgb(0, 0, 0, 0.1);
-    border-radius: var(--gap-tiny);
-    background:var(--color-light);
-    font-size: var(--font-size-small);
-    color: var(--color-primary);
-    margin-top: var(--gap-tiny);
-}
-
-.add_product_input_cont textarea{
-    height: 64px;
-}
-
-.add_product_input_cont input:focus,
-.add_product_input_cont select:focus,
-.add_product_input_cont textarea:focus {
-    border-bottom: 2px solid var(--color-light);
-}
-
-.terms_container{
-    margin: var(--gap-base);
-    width: 75%;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--color-muted);
-    padding: var(--gap-base);
-    border-radius: var(--border-radius);
-}
-
-.terms_container h3{
-    color:var(--color-text-primary);
-}
-
-.terms_container li{
-    color:var(--color-text-secondary);
-    line-height: 2;
-}
-
-.terms_container ul{
-    gap:var(--gap-small);
-}
-
-.button_div button {
-    margin-top: var(--gap-small);
-    padding: var(--gap-small) var(--gap-base);
-    font-size: var(--font-size-small);
-    font-weight: 200;
-    background-color: var(--color-primary);
-    color: white;
-    border: none;
-    border-radius: var(--gap-tiny);
-    cursor: pointer;
-}
-
-.row_div{
-    display: flex;
-    gap:var(--gap-large);
-}
-
-.row_div input,
-.row_div select{
-    width: 480px;
-}
-
-

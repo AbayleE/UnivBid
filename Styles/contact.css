@@ -1,112 +1,92 @@
-body {
-    background-color: var(--color-light-background);
+/* Contact page: intro on the left, form card on the right (45/55 on desktop). */
+
+.contact-layout {
+  display: grid;
+  gap: var(--space-8);
+  align-items: start;
 }
 
-#main_content {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    width: 100%;
-    gap: var(--gap-large);
-    padding: 0 var(--gap-large); 
+.contact-intro { min-width: 0; }
+.contact-intro h1 { font-size: var(--fs-display); line-height: 1.1; }
+.contact-intro p { max-width: 48ch; font-size: var(--fs-md); }
+
+/* Scoped under .contact-intro so it outranks main.css's ul[role="list"] { margin: 0 } reset. */
+.contact-intro .contact-points {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-muted);
 }
 
-.left_wrapper {
-    position: absolute;
-    left: 10%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: left;
-    padding: var(--gap-large);
-    width: 500px;
-    transition: all 0.3s;
+.contact-points li { display: flex; gap: var(--space-3); }
+.contact-points i { margin-top: 0.3em; color: var(--color-primary); }
+
+/* ---------- Form card ---------- */
+.contact-card {
+  min-width: 0;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.left_wrapper:hover{
-    transform: translateY(-20px);
+.contact-card h2 {
+  margin-bottom: var(--space-6);
+  font-size: var(--fs-lg);
 }
 
+.contact-form .form-section,
+.contact-form .form-row { gap: var(--space-6); }
 
-#image_background {
-    position: absolute;
-    opacity: 0.2;
-    left: 5%;
-    top: 40%;
-    z-index: -1;
+.contact-form .field { gap: var(--space-2); }
+
+.contact-form .field > label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.01em;
 }
 
-.wrapper {
-    position: absolute;
-    left: 55%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-top: 6%;
-    padding: var(--gap-base);
-    width: 500px; 
-    height: 70vh;
-    border-radius: 0 var(--gap-base) 0 var(--gap-base);
-    box-shadow: 2px 2px 10px hsl(0, 0%, 0% , 0.2);
+/* The :not() chain matches main.css's base input selector so these overrides win. */
+.contact-form .field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.contact-form .field textarea {
+  min-height: 48px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg);
+  line-height: 1.5;
 }
 
-.wrapper h1{
-    color: var(--color-primary);
-    font-size: var(--font-size-xlarge);
+.contact-form .field textarea { min-height: 160px; }
+
+.contact-form .field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
+.contact-form .field textarea:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
 }
 
-.title h1{
-    margin-bottom: var(--gap-small);
-    color: var(--color-primary);
-    font-size: var(--font-size-xxlarge);
+/* Full-width send button with a smooth hover. */
+.contact-form .form-actions { margin-top: var(--space-8); }
+
+.contact-form .send_btn {
+  width: 100%;
+  transition: background-color var(--transition), transform var(--transition), box-shadow var(--transition);
 }
 
-.contact-form {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-primary);
-    width: 100%;
+.contact-form .send_btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(165, 215, 110, 0.18);
 }
 
-.input-fields {
-    display: flex;
-    flex-direction: column;
-    margin-right: var(--gap-base);
-    width: 100%;
-    max-width: 300px;
+.contact-form .send_btn:active { transform: translateY(0); box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-form .send_btn,
+  .contact-form .send_btn:hover { transform: none; }
 }
 
-
-#msg {
-    width: 400px; 
+@media (min-width: 600px) {
+  .contact-card { padding: var(--space-8); }
 }
 
-
-.input-fields .input,
-.msg textarea {
-    margin: var(--gap-small) 0;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid var(--color-dark);
-    padding: var(--gap-small);
-    color: var(--color-text-primary);
-    width: 100%;
-    outline: none;
-    font-size: var(--font-size-small); 
+@media (min-width: 900px) {
+  .contact-layout { grid-template-columns: 9fr 11fr; gap: var(--space-12); }
+  .contact-intro { position: sticky; top: calc(var(--header-height) + var(--space-8)); padding-top: var(--space-6); }
 }
-
-.send_btn {
-    color: var(--color-background);
-    text-align: center;
-    padding: 16px;
-    border-radius: var(--gap-tiny);
-    border: none;
-    background-color: var(--color-accent-dark);
-    cursor: pointer;
-    font-size: var(--font-size-base);
-    margin-top: var(--gap-base);
-}
-  

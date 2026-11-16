@@ -1,0 +1,151 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function text(value, maxLength) {
+      return value is string && value.size() <= maxLength;
+    }
+
+    function validPrice(price) {
+      return price is number && price > 0 && price <= 9999999.99;
+    }
+
+    // TRANSITIONAL: listings created before this iteration store quantity as a
+    // string such as "3". The client now writes integers. Drop the string
+    // branch once old listings have been migrated.
+    function validQuantity(quantity) {
+      return (quantity is int && quantity > 0 && quantity <= 999999)
+        || (quantity is string && quantity.matches('[1-9][0-9]{0,5}'));
+    }
+
+    // Photos are uploaded to this project's Cloudinary account. Anything else
+    // would make every viewer's browser fetch from a host the seller picked.
+    function validImage(image) {
+      return image is string
+        && image.size() <= 2048
+        && (image == '' || image.matches('https://res\\.cloudinary\\.com/dn6sg7qiq/.+'));
+    }
+
+    function validDeadline(deadline) {
+      return deadline is string
+        && (deadline == '' || deadline.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}'));
+    }
+
+    // Fields a seller controls. Applied to both create and update.
+    function validListing(data) {
+      return data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 120
+        && text(data.description, 2000)
+        && validPrice(data.price)
+        && validQuantity(data.product_quantity)
+        && data.condition in ['New', 'Like New', 'Fairly Good', 'Used', 'Heavily Used']
+        && validImage(data.image)
+        && text(data.get('categories', ''), 64)
+        && validDeadline(data.get('auction_deadline', ''));
+    }
+
+    // Fields the profile page and sign-up write. Everything about Stripe is
+    // written only by the server (Admin SDK, which bypasses these rules), and
+    // may already be present on the document when the profile is saved again.
+    function validProfile(data) {
+      return data.keys().hasOnly([
+             'email', 'firstName', 'lastName', 'UserID', 'phone', 'university',
+             'avatar', 'contact_choice',
+             'sellerStripeAccountId', 'stripeChargesEnabled', 'stripePayoutsEnabled',
+             'stripeRequirementsDue'])
+        && text(data.get('email', ''), 254)
+        && text(data.get('firstName', ''), 60)
+        && text(data.get('lastName', ''), 60)
+        && text(data.get('phone', ''), 32)
+        && text(data.get('university', ''), 120)
+        && text(data.get('avatar', ''), 2048)
+        && (data.get('avatar', '') == '' || data.get('avatar', '').matches('https://.+'))
+        && data.get('contact_choice', {}) is map
+        && data.get('contact_choice', {}).keys().hasOnly(['contact_email', 'contact_phone'])
+        && data.get('contact_choice', {}).get('contact_email', true) is bool
+        && data.get('contact_choice', {}).get('contact_phone', false) is bool;
+    }
+
+    // Profiles hold email and phone, so only the owner can read them.
+    match /users/{uid} {
+      allow read, delete: if signedIn() && request.auth.uid == uid;
+
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.get('UserID', uid) == uid
+        && !request.resource.data.keys().hasAny([
+             'sellerStripeAccountId', 'stripeChargesEnabled', 'stripePayoutsEnabled',
+             'stripeRequirementsDue'])
+        && validProfile(request.resource.data);
+
+      // Only the listed profile fields may change, so the Stripe fields the
+      // server wrote survive every profile save.
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+             'email', 'firstName', 'lastName', 'phone', 'university', 'avatar', 'contact_choice'])
+        && validProfile(request.resource.data);
+    }
+
+    match /products/{pid} {
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasAll([
+             'pid', 'status', 'soldBy', 'soldBy_name', 'dateListed', 'name',
+             'description', 'price', 'condition', 'image', 'product_quantity'])
+        && request.resource.data.keys().hasOnly([
+             'pid', 'status', 'soldBy', 'soldBy_name', 'dateListed', 'name',
+             'description', 'price', 'condition', 'image', 'product_quantity',
+             'categories', 'auction_deadline'])
+        && request.resource.data.pid == pid
+        && request.resource.data.soldBy == request.auth.uid
+        && request.resource.data.status == 'Available'
+        && text(request.resource.data.soldBy_name, 120)
+        && request.resource.data.dateListed is timestamp
+        && validListing(request.resource.data);
+
+      // soldBy, status, pid, soldBy_name, dateListed and the server-managed
+      // reserved counter cannot change here.
+      allow update: if signedIn()
+        && resource.data.soldBy == request.auth.uid
+        && resource.data.status == 'Available'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+             'name', 'description', 'price', 'condition', 'image',
+             'product_quantity', 'categories', 'auction_deadline'])
+        && validListing(request.resource.data);
+
+      // Sold listings stay as the record behind their orders.
+      allow delete: if signedIn()
+        && resource.data.soldBy == request.auth.uid
+        && resource.data.status == 'Available';
+    }
+
+    // Orders are written only by the Stripe webhook (Admin SDK).
+    match /orders/{orderId} {
+      allow read: if signedIn()
+        && (resource.data.sellerUid == request.auth.uid
+            || resource.data.buyerUid == request.auth.uid);
+      allow write: if false;
+    }
+
+    // Server-only bookkeeping: webhook idempotency and Stripe account lookups.
+    match /webhook_events/{eventId} {
+      allow read, write: if false;
+    }
+
+    match /stripe_accounts/{accountId} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

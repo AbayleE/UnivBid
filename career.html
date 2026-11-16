@@ -4,133 +4,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career</title>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Merriweather:wght@400;700&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta name="theme-color" content="#0e1318">
+    <meta name="description" content="Why UnivBid exists: a student marketplace concept built around campus life.">
+    <title>Our story | UnivBid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="modulepreload" href="firebase.js">
+    <link rel="modulepreload" href="Scripts/services/api.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js">
     <link rel="stylesheet" href="Styles/main.css">
     <link rel="stylesheet" href="Styles/career.css">
-
 </head>
 
 <body>
-    <nav class="main-header-nav">
-      <img src="../Images/logo-transparent_.png" alt="UnivBid Logo" class="logo">
-        <div class="link-navbar">
-            <a href="index.html" aria-label="Home UnivBid">Home</a>
-            <a href="career.html" aria-label="Career Opportunities">Career</a>
-            <a href="#about" aria-label="About UnivBid">About</a>
-            <a href="contact.html" aria-label="Contact Us">Contact</a>
-            <button class="register_btn"> GET STARTED </button>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="index.html">
+                <img src="Images/logo-transparent_.png" alt="UnivBid home" width="132" height="26">
+            </a>
+            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+                <i class="fa-solid fa-bars icon-open" aria-hidden="true"></i><i class="fa-solid fa-xmark icon-close" aria-hidden="true"></i>
+                Menu
+            </button>
+            <div class="site-menu" id="site-menu">
+                <nav aria-label="Main">
+                    <ul class="nav-list">
+                        <li><a href="sales_page.html"><i class="fa-solid fa-store" aria-hidden="true"></i>Browse</a></li>
+                        <li><a href="index.html#how-it-works"><i class="fa-solid fa-circle-question" aria-hidden="true"></i>How it works</a></li>
+                        <li><a href="career.html"><i class="fa-solid fa-book-open" aria-hidden="true"></i>Our story</a></li>
+                        <li><a href="contact.html"><i class="fa-solid fa-envelope" aria-hidden="true"></i>Contact</a></li>
+                    </ul>
+                </nav>
+                <div class="header-actions">
+                    <a class="btn btn-ghost login_btn" href="sign_in.html">Sign in</a>
+                    <a class="btn btn-primary register_btn" href="sign_up.html">Sign up</a>
+                </div>
+            </div>
         </div>
-    </nav>
+    </header>
 
-    <main>
-
-        <div class="main_container">
-            <div class="arch_container">
-                <div class="content_left_career">
-                    <h1> Join our team! </h1>
-                    <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Exercitationem dolore explicabo
-                        assumenda
-                        nulla iste nihil nemo cumque? Officiis perspiciatis architecto placeat cum nam impedit in earum
-                        modi
-                        nostrum itaque. Debitis.</p>
-                    <button class="cta_learn_more">Learn More</button>
-                </div>
-
-                <div class="content_right_career">
-                    <img src="Images/10.png" alt="Conference Icon">
-                </div>
-            </div>
-
-            <div class="arc">
-            </div>
-
-            <div class="info_container">
-                <h2> "Lorem ipsum dolor sit amet consectetur adipisicing elit."</h2>
-                <p>SomeBody</p>
-            </div>
-
-        </div>
-
-       
-        <footer>
-            <div class="footer_container">
-
-                <div class="footer_top">
-                    <div class="footer_brand">
-                        <img src = "Images/logo.png" width = "100px">
-                        <p>The ultimate auction platform desigmed specifically for univeristy students. Buy, sell, and discover amazing deals within your campus community.</p>
-                        <ul class="f-menu">
-                            <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                            <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                            <li><a href="#"><i class="fab fa-google-plus-g"></i></a></li>
-                            <li><a href="#"><i class="fab fa-youtube"></i></a></li>
-                            <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
-                        </ul>
-                    </div>
-
-                    <div class="quick_link">
-                        <h3>Quick Links</h3>
-                        <ul>
-                            <li><a href="#">Browse Auctions</a></li>
-                            <li><a href="#">Create Auction</a></li>
-                            <li><a href="#">How It Works</a></li>
-                            <li><a href="#">Categories</a></li>
-                            <li><a href="#">Poopular Items</a></li>
-                        </ul>
-                    </div>
-
-
-                    <div class="support">
-                        <h3>Support</h3>
-                        <ul>
-                            <li><a href="#">Help Center</a></li>
-                            <li><a href="#">Saftey Guidelines</a></li>
-                            <li><a href="#">Report an Issue</a></li>
-                            <li><a href="#">FAQs</a></li>
-                        </ul>
-                    </div>
-
-
-                    <div class="contact_us">
-                        <h3>Contact Us</h3>
-                        <ul>
-                            <li>Email: univbid.contact@gmail.com</li>
-                            <li>Phone: +123 456 7890</li>
-                            <li>Address: Bremen, Germany</li>
-                        </ul>
+    <main id="main">
+        <section class="story-hero" aria-labelledby="story-title">
+            <div class="container story-hero-inner">
+                <div>
+                    <span class="eyebrow">Our story</span>
+                    <h1 id="story-title">Built around student life.</h1>
+                    <p class="story-lead">Every semester, good things get thrown away or left behind while other students go out and buy the same things new. UnivBid is a concept for keeping them on campus instead.</p>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary btn-lg" href="index.html#how-it-works">See how it works</a>
+                        <a class="btn btn-secondary btn-lg" href="contact.html">Share feedback</a>
                     </div>
                 </div>
-
-                <hr>
-
-                <div class="footer_bottom">
-                    <p>&copy; 2025 UnivBid | All rights reserved</p>
-                    <div class="policies">
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Terms of Service</a>
-                        <a href="#">Cookie Policy</a>
-                    </div>
-                </div>
-
+                <img class="story-illustration" src="Images/10.png" alt="Illustration of students exchanging items" width="676" height="591">
             </div>
-        </footer>
+        </section>
 
+        <section class="section section-alt" aria-labelledby="values-title">
+            <div class="container">
+                <div class="section-header">
+                    <span class="eyebrow">What we care about</span>
+                    <h2 id="values-title">A marketplace works best when it feels close to home.</h2>
+                </div>
+                <ul class="values" role="list">
+                    <li class="card value">
+                        <span class="step-icon"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>
+                        <h3>Local by design</h3>
+                        <p>Buyers and sellers share a campus, so handovers are short walks, not shipping labels.</p>
+                    </li>
+                    <li class="card value">
+                        <span class="step-icon"><i class="fa-solid fa-recycle" aria-hidden="true"></i></span>
+                        <h3>Less waste</h3>
+                        <p>Textbooks, lamps and desks get a second semester instead of a trip to the bin.</p>
+                    </li>
+                    <li class="card value">
+                        <span class="step-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                        <h3>Honest and safe</h3>
+                        <p>Clear labels for what's real and what's a sample, and user content that's never rendered as code.</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="project-title">
+            <div class="container story-project">
+                <div>
+                    <span class="eyebrow">About the project</span>
+                    <h2 id="project-title">A portfolio prototype</h2>
+                    <p class="muted">UnivBid is built with plain HTML, CSS and JavaScript on Firebase, with a tested Stripe payments backend that isn't switched on yet. See the <a href="index.html#status">prototype status</a> for what works today.</p>
+                </div>
+                <a class="btn btn-secondary btn-lg" href="sign_up.html">Try it out</a>
+            </div>
+        </section>
     </main>
 
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="Images/logo-transparent_.png" alt="UnivBid" width="122" height="24">
+                    <p>A student marketplace prototype for listing and finding campus essentials.</p>
+                </div>
+                <nav class="footer-col" aria-labelledby="footer-marketplace">
+                    <h2 id="footer-marketplace">Marketplace</h2>
+                    <ul>
+                        <li><a href="sales_page.html">Browse listings</a></li>
+                        <li><a href="create_auction.html">Sell an item</a></li>
+                        <li><a href="shopping_list.html">Saved items</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                    </ul>
+                </nav>
+                <nav class="footer-col" aria-labelledby="footer-project">
+                    <h2 id="footer-project">Project</h2>
+                    <ul>
+                        <li><a href="index.html#how-it-works">How it works</a></li>
+                        <li><a href="index.html#status">Prototype status</a></li>
+                        <li><a href="career.html">Our story</a></li>
+                    </ul>
+                </nav>
+                <div class="footer-col">
+                    <h2>Contact</h2>
+                    <ul>
+                        <li><a href="contact.html">Contact form</a></li>
+                        <li><a href="mailto:univbid.contact@gmail.com">univbid.contact@gmail.com</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 UnivBid. Student marketplace prototype.</p>
+                <p>Online payments aren't switched on yet.</p>
+            </div>
+        </div>
+    </footer>
 
     <div id="global-notification" class="notification hidden">
         <div class="notification-content">
             <span id="notification-message"></span>
-            <button class="notification-close">&times;</button>
+            <button type="button" class="notification-close" aria-label="Close notification">&times;</button>
         </div>
     </div>
 
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="Scripts/pages/home_page.js"></script>
+    <script type="module" src="Scripts/components/nav.js"></script>
 </body>
-
-<script type="module" src="Scripts/pages/home_page.js" defer></script>
-<script type="module" src="firebase.js" defer></script>
 
 </html>
