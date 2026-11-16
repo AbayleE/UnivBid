@@ -1,4 +1,4 @@
-/* Contact page layout. */
+/* Contact page: intro on the left, form card on the right (45/55 on desktop). */
 
 .contact-layout {
   display: grid;
@@ -6,22 +6,87 @@
   align-items: start;
 }
 
+.contact-intro { min-width: 0; }
 .contact-intro h1 { font-size: var(--fs-display); line-height: 1.1; }
 .contact-intro p { max-width: 48ch; font-size: var(--fs-md); }
 
-.contact-points {
+/* Scoped under .contact-intro so it outranks main.css's ul[role="list"] { margin: 0 } reset. */
+.contact-intro .contact-points {
   display: grid;
   gap: var(--space-3);
   margin-top: var(--space-6);
+  padding: 0;
+  list-style: none;
   color: var(--color-text-muted);
 }
 
 .contact-points li { display: flex; gap: var(--space-3); }
 .contact-points i { margin-top: 0.3em; color: var(--color-primary); }
 
-.contact-card h2 { margin-bottom: var(--space-5); }
+/* ---------- Form card ---------- */
+.contact-card {
+  min-width: 0;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.contact-card h2 {
+  margin-bottom: var(--space-6);
+  font-size: var(--fs-lg);
+}
+
+.contact-form .form-section,
+.contact-form .form-row { gap: var(--space-6); }
+
+.contact-form .field { gap: var(--space-2); }
+
+.contact-form .field > label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.01em;
+}
+
+/* The :not() chain matches main.css's base input selector so these overrides win. */
+.contact-form .field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.contact-form .field textarea {
+  min-height: 48px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg);
+  line-height: 1.5;
+}
+
+.contact-form .field textarea { min-height: 160px; }
+
+.contact-form .field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
+.contact-form .field textarea:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+/* Full-width send button with a smooth hover. */
+.contact-form .form-actions { margin-top: var(--space-8); }
+
+.contact-form .send_btn {
+  width: 100%;
+  transition: background-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.contact-form .send_btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(165, 215, 110, 0.18);
+}
+
+.contact-form .send_btn:active { transform: translateY(0); box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-form .send_btn,
+  .contact-form .send_btn:hover { transform: none; }
+}
+
+@media (min-width: 600px) {
+  .contact-card { padding: var(--space-8); }
+}
 
 @media (min-width: 900px) {
-  .contact-layout { grid-template-columns: 0.9fr 1.1fr; gap: var(--space-12); }
-  .contact-intro { position: sticky; top: calc(var(--header-height) + var(--space-8)); }
+  .contact-layout { grid-template-columns: 9fr 11fr; gap: var(--space-12); }
+  .contact-intro { position: sticky; top: calc(var(--header-height) + var(--space-8)); padding-top: var(--space-6); }
 }

@@ -15,11 +15,46 @@
   font-size: var(--fs-xs);
 }
 
-.dashboard-listings .toolbar h2 { margin: 0; }
+/* Breathing room between the stat tiles and the listings section. */
+.dashboard-listings {
+  margin-top: var(--space-8); /* adds to the stat grid's 2rem bottom margin */
+  padding-top: var(--space-10);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dashboard-listings .toolbar {
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.dashboard-listings .toolbar h2 { margin: 0; line-height: 1.2; }
 .dashboard-listings .toolbar h2:focus { outline: none; }
 .dashboard-listings .toolbar h2:focus-visible { outline: 3px solid var(--color-focus); }
 
+/* Search field: icon centred in a square slot, text padded clear of it. */
+.dashboard-listings .search_bar {
+  align-items: center;
+  align-self: center;
+}
+
+.dashboard-listings .search_bar input { padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); }
+
+.dashboard-listings .search_bar button {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--tap);
+  height: var(--tap);
+  font-size: var(--fs-sm);
+  transition: color var(--transition), background-color var(--transition);
+}
+
 .dashboard-listings .search-results-status { margin-bottom: var(--space-3); }
+
+@media (min-width: 600px) {
+  .dashboard-listings { margin-top: var(--space-10); padding-top: var(--space-12); }
+}
 
 @media (min-width: 700px) {
   .dashboard-listings .toolbar .search_bar { max-width: 320px; }
