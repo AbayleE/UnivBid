@@ -10,7 +10,8 @@ export const tick = (ms = 0) => new Promise((r) => setTimeout(r, ms));
 export const s = {};
 export const reset = (o = {}) => Object.assign(s, {
   uploads: 0, uploadOk: true, added: [], updated: [], saveOk: true, listed: 0, user: { uid: 'u1' },
-  salesResult: { success: true, soldCount: 0, earningsCents: 0 }, catalog: [], pageSize: 3, fetchFails: false, products: [], avatar: { success: true, profile_pic: 'https://x.example/me.png' }, profile: { firstName: 'Ada' },
+    salesResult: { success: true, soldCount: 0, earningsCents: 0 }, catalog: [], pageSize: 3, fetchFails: false, products: [], avatar: { success: true, profile_pic: 'https://x.example/me.png' }, profile: { firstName: 'Ada' },
+    activeCount: { success: false }, byId: {}, byIdFails: false,
 }, o);
 reset();
 
@@ -48,12 +49,16 @@ export function setup(body = '') {
       updateuserProfile: async () => ({ success: true }),
       fetchuser_profile: async () => s.avatar,
       fetchSellerSales: async () => s.salesResult,
+      countActiveListings: async () => s.activeCount,
+      fetchProductById: async (id) => (s.byIdFails ? { success: false, error: 'offline' } : { success: true, product: s.byId[id] ?? null }),
     },
   });
   mock.module(url('Scripts/services/auth.js'), {
     namedExports: {
       getCurrentuserdata: async () => s.profile, logoutuser: async () => ({}),
       registerUser: async () => ({ success: true }), signinUser: async () => ({ success: true }),
+      safeNext: (v, fallback = 'dashboard.html') => (typeof v === 'string' && /^[A-Za-z0-9_]+\.html/.test(v) ? v : fallback),
+      signInUrl: () => `sign_in.html?next=${encodeURIComponent(window.location.pathname.split('/').pop() + window.location.search)}`,
     },
   });
   return dom.window;

@@ -17,28 +17,43 @@ const data = {
     numeric: { status: 'Available', soldBy: 'seller', price: 20, name: 'Desk', description: 'Oak' },
     sold: { status: 'Sold', soldBy: 'seller', price: '5.00', name: 'x' },
     nan: { status: 'Available', soldBy: 'seller', price: 'NaN', name: 'x' },
-    cheap: { status: 'Available', soldBy: 'seller', price: '1.00', name: 'x' },
+    cheap: { status: 'Available', soldBy: 'seller', price: '0.30', name: 'x' },
+    reserved: { status: 'Available', soldBy: 'seller', price: '5.00', name: 'x', product_quantity: 1, reserved: 1 },
+    pending: { status: 'Available', soldBy: 'pending', price: '5.00', name: 'x' },
     noacct: { status: 'Available', soldBy: 'plain', price: '5.00', name: 'x' },
     badacct: { status: 'Available', soldBy: 'forged', price: '5.00', name: 'x' },
     mine: { status: 'Available', soldBy: 'buyer', price: '5.00', name: 'x' },
   },
   users: {
-    seller: { sellerStripeAccountId: 'acct_REAL123' },
+    seller: { sellerStripeAccountId: 'acct_REAL123', stripeChargesEnabled: true },
+    pending: { sellerStripeAccountId: 'acct_PENDING', stripeChargesEnabled: false },
     plain: {},
     forged: { sellerStripeAccountId: 'not-an-account' },
   },
 };
 
+// Every real listing has a quantity (the rules require it).
+for (const product of Object.values(data.products)) product.product_quantity ??= 1;
+
 const calls = [];
+let sessionFails = false;
 const db = {
   collection: (c) => ({
     doc: (id) => ({
+      key: [c, id],
       get: async () => ({ exists: id in data[c], data: () => data[c][id] }),
     }),
   }),
+  runTransaction: async (fn) => fn({
+    get: async (ref) => ({ exists: ref.key[1] in data[ref.key[0]], data: () => data[ref.key[0]][ref.key[1]] }),
+    update: (ref, patch) => Object.assign(data[ref.key[0]][ref.key[1]], patch),
+  }),
 };
 const stripe = {
-  checkout: { sessions: { create: async (args) => { calls.push(args); return { url: 'https://stripe.test/s' }; } } },
+  checkout: { sessions: { create: async (args) => {
+    if (sessionFails) throw new Error('stripe down');
+    calls.push(args); return { url: 'https://stripe.test/s' };
+  } } },
 };
 
 mock.module(url('stripe-backend/config/clients.js'), { namedExports: { db, stripe, adminAuth: {} } });
@@ -63,16 +78,31 @@ test('ignores client price and account; uses Firestore values', async () => {
   assert.equal(s.payment_intent_data.transfer_data.destination, 'acct_REAL123');
   assert.equal(s.line_items[0].price_data.product_data.name, 'Lamp');
   assert.equal(s.line_items[0].price_data.product_data.description, undefined);
-  assert.equal(s.success_url, 'https://app.example/success.html');
-  assert.deepEqual(s.metadata, { productId: 'good', buyerUid: 'buyer', sellerUid: 'seller', platformFeeCents: '100' });
+  assert.equal(s.success_url, 'https://app.example/success.html?session_id={CHECKOUT_SESSION_ID}');
+  assert.equal(s.cancel_url, 'https://app.example/cancel.html?product=good');
+  // 5% of 12.50 is 63 cents, above the 50 cent floor.
+  assert.equal(s.payment_intent_data.application_fee_amount, 63);
+  assert.deepEqual(s.metadata, { productId: 'good', buyerUid: 'buyer', sellerUid: 'seller', platformFeeCents: '63' });
+  assert.equal(data.products.good.reserved, 1);
   const window = s.expires_at - Math.floor(Date.now() / 1000);
   assert.ok(window >= 30 * 60 && window <= 32 * 60);
 });
 
-test('numeric price works', async () => {
+test('numeric price works and the fee floor applies to cheap items', async () => {
   calls.length = 0;
   assert.equal((await run({ productId: 'numeric' })).status, 200);
   assert.equal(calls[0].line_items[0].price_data.unit_amount, 2000);
+  assert.equal(calls[0].payment_intent_data.application_fee_amount, 100);
+});
+
+test('a failed Stripe call releases the reserved unit', async () => {
+  calls.length = 0;
+  data.products.numeric.reserved = 0;
+  sessionFails = true;
+  const r = await run({ productId: 'numeric' });
+  sessionFails = false;
+  assert.equal(r.status, 502);
+  assert.equal(data.products.numeric.reserved, 0);
 });
 
 for (const [name, body, status] of [
@@ -83,7 +113,9 @@ for (const [name, body, status] of [
   ['sold', { productId: 'sold' }, 409],
   ['own listing', { productId: 'mine' }, 403],
   ['NaN price', { productId: 'nan' }, 422],
-  ['price not above fee', { productId: 'cheap' }, 422],
+  ['price below the minimum charge', { productId: 'cheap' }, 422],
+  ['last unit already reserved', { productId: 'reserved' }, 409],
+  ['seller onboarding not finished', { productId: 'pending' }, 422],
   ['seller without account', { productId: 'noacct' }, 422],
   ['malformed account', { productId: 'badacct' }, 422],
 ]) {

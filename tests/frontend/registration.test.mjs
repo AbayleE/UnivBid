@@ -31,6 +31,7 @@ mock.module(url('firebase.js'), {
       state.deleted.push(u.uid);
     },
     signOut: async () => { state.signedOut += 1; },
+    sendEmailVerification: async () => { state.verificationSent = (state.verificationSent || 0) + 1; },
     signInWithEmailAndPassword: async () => {}, onAuthStateChanged: () => {}, deleteDoc: 0, getDoc: 0,
     addDoc: 0, collection: 0, getDocs: 0, query: 0, where: 0, updateDoc: 0, onSnapshot: 0,
     setPersistence: 0, browserLocalPersistence: 0,

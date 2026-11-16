@@ -17,7 +17,7 @@ await import(url('Scripts/pages/sales_page.js'));
 window.document.dispatchEvent(new window.Event('DOMContentLoaded'));
 await tick(30);
 
-const names = () => [...document.querySelectorAll('.product_card strong')].map((n) => n.textContent);
+const names = () => [...document.querySelectorAll('.product_card .card-title')].map((n) => n.textContent);
 const button = () => document.querySelector('.load_more_btn');
 
 if (scenario === 'paged') {
@@ -37,7 +37,7 @@ if (scenario === 'paged') {
 }
 if (scenario === 'empty' || scenario === 'allOwn') {
   test(`${scenario}: shows the empty message and no Load more`, () => {
-    assert.match(document.querySelector('.listing_board').textContent, /No available products found/);
+    assert.match(document.querySelector('.listing_board').textContent, /No listings yet/);
     assert.equal(button().hidden, true);
   });
 }

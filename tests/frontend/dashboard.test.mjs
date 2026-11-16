@@ -17,7 +17,7 @@ await import(url('Scripts/pages/dashboard.js'));
 window.document.dispatchEvent(new window.Event('DOMContentLoaded'));
 await tick(30);
 
-const stat = (id) => document.querySelector(`#${id} h2`).innerText ?? document.querySelector(`#${id} h2`).textContent;
+const stat = (id) => document.querySelector(`#${id} .stat-number`).textContent;
 const dialog = () => document.querySelector('dialog');
 
 test('stats come from real listings', () => {
@@ -25,7 +25,7 @@ test('stats come from real listings', () => {
   assert.equal(String(stat('total_sold_items')), '2');
   assert.equal(String(stat('total_active_listings')), '2');
   assert.equal(document.querySelector('#total_bought_items'), null);
-  assert.equal(document.querySelector('#total_active_listings p').innerText, 'Active Listings');
+  assert.equal(document.querySelector('#total_active_listings .stat-label').textContent, 'Active listings');
 });
 
 test('sold listings have no Edit button', () => {
@@ -40,7 +40,7 @@ test('nav avatar shows the user picture', () => {
 test('whitespace image falls back to the placeholder', () => {
   const imgs = [...document.querySelectorAll('.product_card_list img')];
   assert.equal(imgs.length, 4);
-  assert.match(imgs[0].src, /Images\/13\.png$/);
+  assert.match(imgs[0].src, /Images\/placeholder-listing\.svg$/);
   assert.equal(imgs[1].src, 'https://x.example/d.png');
 });
 
@@ -52,7 +52,7 @@ test('Create Auction button does not open a dialog', async () => {
 
 test('Edit opens the edit dialog and saves without a new image', async () => {
   document.querySelectorAll('.edit-btn')[1].click();
-  assert.equal(dialog().querySelector('h2').textContent || dialog().querySelector('h2').innerText, 'Edit Product');
+  assert.equal(dialog().querySelector('h2').textContent, 'Edit listing');
   pick(dialog().querySelector('#product_image'), null);
   dialog().querySelector('#submit_btn').click();
   await tick(20);
@@ -88,5 +88,5 @@ test('failed edit keeps the dialog open', async () => {
   await tick(20);
   assert.ok(dialog());
   assert.equal(dialog().querySelector('#submit_btn').disabled, false);
-  assert.match(message(), /Update Failed/);
+  assert.match(message(), /update failed/i);
 });

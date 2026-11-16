@@ -11,6 +11,8 @@ const fill = (agreed = true) => {
   $('#product_description').value = 'Nice';
   $('#product_price').value = '12.5';
   $('#product_quantity').value = '1';
+  $('#category').value = 'books';
+  $('#product_condition').value = 'Like New';
   $('#auction_deadline').value = '2030-01-01';
   $('#agreementCheckbox').checked = agreed;
 };
@@ -27,7 +29,7 @@ test('terms must be accepted', async () => {
   reset(); fill(false); setFile($('#product_image'), png());
   submit(); await tick(20);
   assert.equal(s.uploads, 0); assert.equal(s.added.length, 0);
-  assert.match(message(), /Terms of Service/);
+  assert.match(message(), /confirm your listing follows the guidelines/);
 });
 
 test('files over 5MB and non-images are rejected before upload', async () => {
