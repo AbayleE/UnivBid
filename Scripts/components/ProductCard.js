@@ -1,9 +1,32 @@
 import { auth, onAuthStateChanged } from '../../firebase.js';
 import { getproductDetail, updateProductDetail, deleteProduct, fetchProducts } from '../services/api.js';
-import { getCurrentuserdata } from '../services/auth.js';
+import { getCurrentuserdata, signInUrl } from '../services/auth.js';
 import { showNotification } from '../services/notifications.js';
 import { formatPrice, parsePrice } from '../services/price.js';
 import { uploadImage } from '../services/upload.js';
+import {
+    CONDITIONS, LIMITS, categoryLabel, conditionLabel, createEmptyState, el, icon,
+    linkButton, renderSkeletonCards, renderSkeletonRows, setListingImage,
+} from './listingMeta.js';
+import {
+    addCounter, createField, createPhotoPicker, imageFileError, makeInput, makeSelect,
+    setBusy, setFieldError,
+} from './form.js';
+
+const DETAIL_PAGE = 'product_listing_page.html';
+
+const priceText = (price) => {
+    const formatted = formatPrice(price);
+    return formatted === 'N/A' ? 'Price not set' : `€${formatted}`;
+};
+
+// Links by id, so the listing page can be shared and reloaded. The cached
+// copy lets that page paint before Firestore answers.
+function linkToListing(link, data) {
+    link.href = `${DETAIL_PAGE}?id=${encodeURIComponent(data.pid || data.id || '')}`;
+    const remember = () => sessionStorage.setItem('selected_item', JSON.stringify(data));
+    ['click', 'auxclick', 'contextmenu'].forEach((type) => link.addEventListener(type, remember));
+}
 
 export class Loaduserslistings {
     constructor(container, header_title, body, onListingsLoaded) {
@@ -12,6 +35,8 @@ export class Loaduserslistings {
         this.header_title = header_title;
         this.body = body;
         this.onListingsLoaded = onListingsLoaded;
+        this.focusAfterRender = null;
+        this.container.setAttribute('role', 'list');
         this.setup();
     }
 
@@ -19,212 +44,201 @@ export class Loaduserslistings {
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const result = await getCurrentuserdata();
-                if (result) {
-                    this.header_title.innerText = `${result.firstName}`;
+                if (result?.firstName) {
+                    this.header_title.textContent = result.firstName;
                 }
                 this.DisplayListings();
             } else {
-                showNotification("Please login first");
-                window.location.href = "sign_in.html";
+                showNotification("Please sign in to see your dashboard.");
+                window.location.href = signInUrl();
             }
         });
     }
 
     openDialogBox(data) {
-        if (this.currentDialog) {
-            this.removeDialog();
-        }
+        if (this.currentDialog) this.closeDialog();
 
-        const product_dialog = document.createElement("dialog");
-        product_dialog.classList.add("product_dialog");
-        this.currentDialog = product_dialog;
+        const dialog = el('dialog', 'product_dialog');
+        dialog.setAttribute('aria-labelledby', 'edit-dialog-title');
+        this.currentDialog = dialog;
 
-        const title = document.createElement("h2");
-        title.innerText = "Edit Product";
-        product_dialog.appendChild(title);
+        const body = el('div', 'dialog-body');
+        const header = el('div', 'dialog-header');
+        const title = el('h2', '', 'Edit listing');
+        title.id = 'edit-dialog-title';
+        const closeIcon = el('button', 'icon-btn');
+        closeIcon.type = 'button';
+        closeIcon.setAttribute('aria-label', 'Close');
+        closeIcon.append(icon('fa-xmark'));
+        header.append(title, closeIcon);
 
-        const input_container = document.createElement("div");
-        input_container.classList.add("input_container");
+        const form = el('form', 'input_container');
+        form.noValidate = true;
 
-        const product_name_cont = document.createElement("div");
-        product_name_cont.classList.add("add_product_input_cont");
-        const product_name_label = document.createElement("label");
-        product_name_label.innerText = "Product Name: "
-        const product_name = document.createElement("input");
-        product_name.id = "product_name";
-        product_name_cont.append(product_name_label, product_name);
+        const nameField = createField({
+            id: 'product_name', label: 'Title', control: makeInput('text', { autocomplete: 'off' }),
+        });
+        nameField.control.value = data.name || '';
+        addCounter(nameField, LIMITS.name);
 
+        const descField = createField({
+            id: 'product_description', label: 'Description', control: makeInput('textarea', { rows: '4' }),
+        });
+        descField.control.value = data.description || '';
+        addCounter(descField, LIMITS.description);
 
-        const product_desc_cont = document.createElement("div");
-        product_desc_cont.classList.add("add_product_input_cont", "fullwidth");
-        const product_desc_label = document.createElement("label");
-        product_desc_label.innerText = "Product Description: "
-        const product_description = document.createElement("textarea");
-        product_description.id = "product_description";
-        product_desc_cont.append(product_desc_label, product_description);
+        const priceInput = makeInput('number', { min: '0.01', step: '0.01', inputmode: 'decimal' });
+        const priceField = createField({ id: 'product_price', label: 'Price', control: priceInput });
+        const affix = el('div', 'input-affix');
+        const euro = el('span', '', '€');
+        euro.setAttribute('aria-hidden', 'true');
+        priceInput.replaceWith(affix);
+        affix.append(euro, priceInput);
 
+        const qtyField = createField({
+            id: 'product_quantity', label: 'Quantity',
+            control: makeInput('number', { min: '1', max: String(LIMITS.quantityMax), step: '1', inputmode: 'numeric' }),
+        });
 
-        const product_price_cont = document.createElement("div");
-        product_price_cont.classList.add("add_product_input_cont");
-        const product_price_label = document.createElement("label");
-        product_price_label.innerText = "Product Price: "
-        const product_price = document.createElement("input");
-        product_price.id = "product_price";
-        product_price.type = "number";
-        product_price_cont.append(product_price_label, product_price);
+        const condField = createField({
+            id: 'product_condition', label: 'Condition', control: makeSelect(CONDITIONS),
+        });
 
-        const product_quantity_cont = document.createElement("div");
-        product_quantity_cont.classList.add("add_product_input_cont");
-        const product_quantity_label = document.createElement("label");
-        product_quantity_label.innerText = "Product Quantity: "
-        const product_quantity = document.createElement("input");
-        product_quantity.id = "product_quantity";
-        product_quantity.type = "number";
-        product_quantity_cont.append(product_quantity_label, product_quantity);
-
-
-        const product_cond_cont = document.createElement("div");
-        product_cond_cont.classList.add("add_product_input_cont");
-
-        const condition_label = document.createElement("label");
-        condition_label.innerText = "Product Condition: ";
-
-        const condition_labels = document.createElement("select");
-
-        const new_options = document.createElement("option");
-        new_options.value = "New";
-        new_options.innerText = "New";
-
-        const good_options = document.createElement("option");
-        good_options.value = "Fairly Good";
-        good_options.innerText = "Fairly Good";
-
-        const used_options = document.createElement("option");
-        used_options.value = "Used";
-        used_options.innerText = "Used";
-
-        const like_new = document.createElement("option");
-        like_new.value = "Like New";
-        like_new.innerText = "Like New";
-
-        const heavily_used = document.createElement("option");
-        heavily_used.value = "Heavily Used";
-        heavily_used.innerText = "Heavily Used";
-
-        condition_labels.append(new_options, like_new, good_options, used_options, heavily_used);
-        product_cond_cont.append(condition_label, condition_labels);
-
-        const product_image_cont = document.createElement("div");
-        product_image_cont.classList.add("add_product_input_cont");
-
-        const product_image_label = document.createElement("label");
-        product_image_label.innerText = "Product Image: ";
-
-        const product_image = document.createElement("input");
-        product_image.type = "file";
-        product_image.accept = "image/*";
-        product_image.id = "product_image";
+        const photo = createPhotoPicker({
+            id: 'product_image', label: 'Photo', optional: true,
+            hint: 'Leave empty to keep the current photo.',
+            currentImage: data.image?.trim() || '',
+        });
         let imageURL = data.image?.trim() || "";
 
-        product_image_cont.append(product_image_label, product_image);
+        const row1 = el('div', 'form-row');
+        row1.append(priceField.wrapper, qtyField.wrapper);
 
-        const button_div_cont = document.createElement("div");
-        button_div_cont.classList.add("button_div_cont");
+        const actions = el('div', 'form-actions button_div_cont');
+        const view_btn = el('a', 'btn btn-ghost view-btn push-start', 'View listing');
+        linkToListing(view_btn, data);
+        const button_close = el('button', 'btn btn-secondary', 'Cancel');
+        button_close.type = 'button';
+        button_close.id = 'close_btn';
+        const button_submit = el('button', 'btn btn-primary', 'Save changes');
+        button_submit.type = 'submit';
+        button_submit.id = 'submit_btn';
+        actions.append(view_btn, button_close, button_submit);
 
-        const button_submit = document.createElement("button");
-        button_submit.id = "submit_btn";
-        button_submit.innerText = "Edit";
+        priceInput.value = data.price ?? '';
+        qtyField.control.value = data.product_quantity ?? '';
+        condField.control.value = data.condition || 'New';
 
-        const button_close = document.createElement("button");
-        button_close.id = "close_btn";
-        button_close.innerText = "Close";
+        form.append(nameField.wrapper, descField.wrapper, row1, condField.wrapper, photo.field.wrapper, actions);
+        body.append(header, form);
+        dialog.append(body);
 
-        button_div_cont.append(button_submit, button_close);
-
-        product_name.value = data.name;
-        product_quantity.value = data.product_quantity;
-        product_description.value = data.description;
-        product_price.value = data.price;
-        condition_labels.value = data.condition;
-
-        const view_btn = document.createElement("button");
-        view_btn.innerText = "View Details";
-        view_btn.classList.add("view-btn");
-
-        view_btn.addEventListener("click", () => {
-            sessionStorage.setItem("selected_item", JSON.stringify(data));
-            window.location.href = "product_listing_page.html";
-        });
-        button_div_cont.appendChild(view_btn);
-
-
-        button_submit.addEventListener("click", async () => {
-
-            const price = parsePrice(product_price.value);
-            if (price === null) {
-                showNotification("Please enter a price greater than 0.", 'error');
-                return;
+        const validate = () => {
+            const checks = [
+                [nameField, nameField.control.value.trim() ? '' : 'Enter a title.'],
+                [descField, descField.control.value.trim() ? '' : 'Enter a description.'],
+                [priceField, parsePrice(priceInput.value) === null ? 'Please enter a price greater than 0.' : ''],
+                [qtyField, /^[1-9][0-9]{0,5}$/.test(qtyField.control.value.trim()) ? '' : 'Enter a whole number of 1 or more.'],
+                [photo.field, imageFileError(photo.input.files?.[0])],
+            ];
+            checks.forEach(([field, message]) => setFieldError(field, message));
+            const firstBad = checks.find(([, message]) => message);
+            if (firstBad) {
+                firstBad[0].control.focus();
+                showNotification(firstBad[1], 'error');
+                return false;
             }
+            return true;
+        };
 
-            button_submit.disabled = true;
+        const save = async () => {
+            if (!validate()) return;
+            const price = parsePrice(priceInput.value);
+
+            setBusy(button_submit, true, 'Saving…');
 
             try {
-                const file = product_image.files[0];
+                const file = photo.input.files?.[0];
                 if (file) imageURL = await uploadImage(file);
             } catch (error) {
+                setFieldError(photo.field, error.message);
                 showNotification(error.message, 'error');
-                button_submit.disabled = false;
+                setBusy(button_submit, false);
                 return;
             }
 
             const productvalues = {
-                name: product_name.value,
-                description: product_description.value,
+                name: nameField.control.value,
+                description: descField.control.value,
                 price,
-                condition: condition_labels.value,
+                condition: condField.control.value,
                 image: imageURL || "",
-                product_quantity: product_quantity.value
-            }
+                product_quantity: parseInt(qtyField.control.value, 10)
+            };
 
             const saved = await this.updateProduct(productvalues, data.pid);
 
             if (saved) {
-                await this.removeDialog();
+                this.focusAfterRender = data.pid;
+                this.closeDialog();
+                await this.DisplayListings();
             } else {
-                button_submit.disabled = false;
+                setBusy(button_submit, false);
             }
+        };
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            save();
+        });
+        button_submit.addEventListener('click', (event) => {
+            // Handled here as well so it works without a real form submission.
+            event.preventDefault();
+            if (!button_submit.disabled) save();
+        });
+        button_close.addEventListener('click', () => this.closeDialog(data.pid));
+        closeIcon.addEventListener('click', () => this.closeDialog(data.pid));
+        dialog.addEventListener('cancel', (event) => {
+            event.preventDefault();
+            this.closeDialog(data.pid);
         });
 
-
-        button_close.addEventListener("click", () => {
-            this.removeDialog();
-        });
-
-        input_container.append(product_name_cont, product_desc_cont, product_price_cont, product_quantity_cont, product_cond_cont, product_image_cont, button_div_cont);
-        product_dialog.appendChild(input_container);
-        this.container.appendChild(product_dialog);
-        product_dialog.showModal();
-
+        this.body.appendChild(dialog);
+        dialog.showModal();
+        nameField.control.focus();
     }
 
+    // Closes without reloading. Pass a pid to return focus to that row.
+    closeDialog(returnFocusPid) {
+        if (!this.currentDialog) return;
+        this.currentDialog.close?.();
+        this.currentDialog.remove();
+        this.currentDialog = null;
+        if (returnFocusPid) this.focusRow(returnFocusPid);
+    }
+
+    // Kept for compatibility: closes the dialog and reloads the listings.
     async removeDialog() {
         if (this.currentDialog) {
-            this.currentDialog.remove();
-            this.currentDialog = null;
+            this.closeDialog();
             await this.DisplayListings();
         }
+    }
 
+    focusRow(pid) {
+        const row = [...this.container.querySelectorAll('[data-pid]')].find((r) => r.dataset.pid === pid);
+        (row?.querySelector('.edit-btn') || row?.querySelector('.delete-btn'))?.focus();
     }
 
     async updateProduct(newProductval, pid) {
         try {
             const result = await updateProductDetail(newProductval, pid);
-            if (!result.success) throw new Error(result.error || "Failed to update product");
-            showNotification("Product updated successfully!", 'success');
+            if (!result.success) throw new Error(result.error || "Failed to update listing");
+            showNotification("Listing updated successfully.", 'success');
             return true;
         } catch (error) {
-            console.error("Failed to get products: ", error);
-            showNotification(`Product Update Failed: ${error.message}`, 'error');
+            console.error("Failed to update listing: ", error);
+            showNotification(`Listing update failed: ${error.message}`, 'error');
             return false;
         }
     }
@@ -234,17 +248,19 @@ export class Loaduserslistings {
             const result = await deleteProduct(pid);
             if (!result.success) throw new Error(result.error);
             await this.DisplayListings();
-            showNotification("Product deleted Successfully!", 'success');
+            showNotification("Listing deleted.", 'success');
+            return true;
         } catch (error) {
-            console.error("Failed to delete products: ", error);
-            showNotification(`Removing Product Failed:${error.message} `, 'error');
+            console.error("Failed to delete listing: ", error);
+            showNotification(`Couldn't delete the listing: ${error.message}`, 'error');
+            return false;
         }
     }
 
-
     async DisplayListings() {
+        this.container.setAttribute('aria-busy', 'true');
+        if (!this.container.querySelector('.product_card_list')) renderSkeletonRows(this.container);
         try {
-            this.container.innerHTML = '';
             const result = await getproductDetail();
             if (result.success) {
                 this.onListingsLoaded(result.products || []);
@@ -254,129 +270,148 @@ export class Loaduserslistings {
                     this.displayNoProducts();
                 }
             } else {
-                showNotification(`Failed to display products: ${result.error} `, 'error');
-
+                this.displayError();
+                showNotification(`Failed to display your listings: ${result.error}`, 'error');
             }
-
         } catch (error) {
-            console.error("Failed to get products for the user: ", error);
-            showNotification(`Fetching product for user failed: ${error.message}` + 'error');
+            console.error("Failed to get listings for the user: ", error);
+            this.displayError();
+            showNotification(`Loading your listings failed: ${error.message}`, 'error');
         }
+        this.container.removeAttribute('aria-busy');
+    }
 
+    displayError() {
+        const retry = el('button', 'btn btn-secondary', 'Try again');
+        retry.type = 'button';
+        retry.addEventListener('click', () => this.DisplayListings());
+        this.container.replaceChildren(createEmptyState({
+            iconName: 'fa-wifi',
+            title: "We couldn't load your listings",
+            text: 'Check your connection and try again.',
+            action: retry,
+            isError: true,
+        }));
     }
 
     displayNoProducts() {
-        const title = document.createElement("p");
-        title.style.marginLeft = "85px";
-        title.innerText = "No products found";
-        this.container.appendChild(title);
+        this.container.replaceChildren(createEmptyState({
+            iconName: 'fa-box-open',
+            title: "You haven't listed anything yet",
+            text: 'Listings you create show up here, where you can edit or remove them.',
+            action: linkButton('create_auction.html', 'Sell an item'),
+        }));
     }
 
     displayProducts(products) {
+        const rows = products.map((data) => {
+            const name = data.name || 'Untitled listing';
+            const isActive = data.status === "Available";
 
-        products.forEach(data => {
-            const product_card = document.createElement("div");
-            product_card.classList.add("product_card_list");
+            const row = el('div', 'product_card_list');
+            row.setAttribute('role', 'listitem');
+            row.dataset.pid = data.pid;
 
-            const img = document.createElement("img");
-            img.src = data.image?.trim() || "Images/13.png";
-            img.alt = data.name || "Product Image";
-            product_card.appendChild(img);
+            const img = el('img', 'row-thumb');
+            img.loading = 'lazy';
+            img.width = 80;
+            img.height = 80;
+            setListingImage(img, data.image, name);
 
-            const info_product = document.createElement("div");
-            info_product.classList.add("info_product");
+            const info = el('div', 'info_product');
+            const title = el('h3', 'row-title');
+            const titleLink = el('a', '', name);
+            linkToListing(titleLink, data);
+            title.append(titleLink);
 
-            const name = document.createElement("span");
-            const name_label = document.createElement("strong");
-            name_label.textContent = " Product Name: ";
-            name.append(name_label, ` ${data.name || "No Name Available"}`);
-            info_product.appendChild(name);
-            const price = document.createElement("span");
-            const price_label = document.createElement("strong");
-            price_label.textContent = "Price:";
-            price.append(price_label, ` € ${formatPrice(data.price)}`);
-            info_product.appendChild(price);
+            const meta = el('p', 'row-meta');
+            const status = el('span', `badge ${isActive ? 'badge-success' : ''}`, isActive ? 'Active' : (data.status || 'Inactive'));
+            meta.append(status);
+            if (data.condition) meta.append(el('span', '', conditionLabel(data.condition)));
+            if (data.product_quantity) meta.append(el('span', '', `Qty ${data.product_quantity}`));
 
-            product_card.appendChild(info_product);
+            info.append(title, meta);
 
-            if (data.status === "Available") {
-                const edit_btn = document.createElement("button");
-                edit_btn.innerText = "Edit Details";
-                edit_btn.classList.add("edit-btn");
-                product_card.appendChild(edit_btn);
+            const price = el('p', 'row-price', priceText(data.price));
 
-                edit_btn.addEventListener("click", () => {
-                    this.openDialogBox(data);
-                });
+            const actions = el('div', 'row-actions');
+            if (isActive) {
+                const edit_btn = el('button', 'btn btn-secondary btn-sm edit-btn');
+                edit_btn.type = 'button';
+                edit_btn.append(icon('fa-pen'), ' Edit');
+                edit_btn.setAttribute('aria-label', `Edit ${name}`);
+                edit_btn.addEventListener('click', () => this.openDialogBox(data));
+                actions.append(edit_btn);
             }
 
-            const delete_btn = document.createElement("button");
-            delete_btn.innerText = "Remove";
-            delete_btn.classList.add("delete-btn");
-            product_card.appendChild(delete_btn);
+            const delete_btn = el('button', 'btn btn-danger-outline btn-sm delete-btn');
+            delete_btn.type = 'button';
+            delete_btn.append(icon('fa-trash-can'), ' Remove');
+            delete_btn.setAttribute('aria-label', `Remove ${name}`);
+            delete_btn.addEventListener('click', () => this.removeProductDialog(data.pid, name));
+            actions.append(delete_btn);
 
-            delete_btn.addEventListener("click", () => {
-                this.removeProductDialog(data.pid);
-            });
-
-            this.container.appendChild(product_card);
+            row.append(img, info, price, actions);
+            return row;
         });
 
+        this.container.replaceChildren(...rows);
 
+        if (this.focusAfterRender) {
+            this.focusRow(this.focusAfterRender);
+            this.focusAfterRender = null;
+        }
     }
 
-    removeProductDialog(pid) {
-        const delete_dialog = document.createElement("dialog");
-        delete_dialog.classList.add("delete_dialog");
+    removeProductDialog(pid, name = 'this listing') {
+        const dialog = el('dialog', 'delete_dialog');
+        dialog.setAttribute('role', 'alertdialog');
+        dialog.setAttribute('aria-labelledby', 'delete-dialog-title');
+        dialog.setAttribute('aria-describedby', 'delete-dialog-text');
 
-        const icon = document.createElement("i");
-        icon.classList.add("fa-solid", "fa-x");
+        const body = el('div', 'dialog-body');
+        const badge = el('span', 'dialog-icon');
+        badge.append(icon('fa-trash-can'));
+        const heading = el('h2', '', 'Remove this listing?');
+        heading.id = 'delete-dialog-title';
+        const text = el('p', 'muted', `“${name}” will be removed from UnivBid. This can't be undone.`);
+        text.id = 'delete-dialog-text';
 
-        const text_header = document.createElement("h2");
-        text_header.textContent = "Confirm Removal"
-        const text = document.createElement("p");
-        text.textContent = "Are you sure you want to remove the product?";
+        const actions = el('div', 'form-actions button_div');
+        const button_no = el('button', 'btn btn-secondary no_button', 'Cancel');
+        button_no.type = 'button';
+        const button_yes = el('button', 'btn btn-danger yes_button', 'Remove listing');
+        button_yes.type = 'button';
+        actions.append(button_no, button_yes);
 
-        const button_div = document.createElement("div");
-        button_div.classList.add("button_div");
+        body.append(badge, heading, text, actions);
+        dialog.append(body);
+        this.body.appendChild(dialog);
+        dialog.showModal();
+        button_no.focus();
 
-        const button_yes = document.createElement("button");
-        button_yes.innerText = "Remove";
-        button_yes.classList.add("yes_button");
-
-        const button_no = document.createElement("button");
-        button_no.innerText = "Cancel";
-        button_no.classList.add("no_button");
-
-        button_div.append(button_yes, button_no);
-
-        delete_dialog.append(icon, text_header, text, button_div);
-        this.body.appendChild(delete_dialog);
-        delete_dialog.showModal();
-
+        const close = () => {
+            dialog.close?.();
+            dialog.remove();
+            this.focusRow(pid);
+        };
 
         button_yes.addEventListener("click", async () => {
-            this.removeProduct(pid)
-            delete_dialog.remove();
-
+            setBusy(button_yes, true, 'Removing…');
+            button_no.disabled = true;
+            const removed = await this.removeProduct(pid);
+            dialog.close?.();
+            dialog.remove();
+            if (removed) document.getElementById('listings-heading')?.focus();
+            else this.focusRow(pid);
         });
 
-        button_no.addEventListener("click", () => {
-            delete_dialog.close();
-            delete_dialog.remove();
-
+        button_no.addEventListener("click", close);
+        dialog.addEventListener('cancel', (event) => {
+            event.preventDefault();
+            close();
         });
-
-        icon.addEventListener("click", () => {
-            delete_dialog.close();
-            delete_dialog.remove();
-
-        });
-
-
     }
-
-
 }
 
 export class getallProducts {
@@ -384,9 +419,8 @@ export class getallProducts {
         this.container = container;
         this.cursor = null;
         this.userID = null;
-        this.loadMoreButton = document.createElement("button");
-        this.loadMoreButton.classList.add("load_more_btn");
-        this.loadMoreButton.innerText = "Load more";
+        this.loadMoreButton = el('button', 'load_more_btn btn btn-secondary btn-lg', 'Load more listings');
+        this.loadMoreButton.type = 'button';
         this.loadMoreButton.hidden = true;
         this.loadMoreButton.addEventListener("click", () => this.loadNextPage());
         this.container.after(this.loadMoreButton);
@@ -398,8 +432,8 @@ export class getallProducts {
             if (user) {
                 await this.fetchAllproducts(user.uid);
             } else {
-                showNotification("Please login first");
-                window.location.href = "sign_in.html";
+                showNotification("Please sign in to browse listings.");
+                window.location.href = signInUrl();
             }
         });
     }
@@ -407,24 +441,33 @@ export class getallProducts {
     async fetchAllproducts(userID) {
         this.userID = userID;
         this.cursor = null;
-        this.container.innerHTML = '';
-        await this.loadNextPage();
+        // Skeletons stay until the first page arrives.
+        if (!this.container.querySelector('.skeleton-card')) renderSkeletonCards(this.container);
+        await this.loadNextPage(true);
     }
 
     // Keeps fetching while a page held only the viewer's own listings, so a
     // click never adds nothing while more listings exist.
-    async loadNextPage() {
+    async loadNextPage(reset = false) {
         this.loadMoreButton.disabled = true;
+        this.loadMoreButton.setAttribute('aria-busy', 'true');
+        this.container.setAttribute('aria-busy', 'true');
 
         try {
             let result;
             let shown = 0;
+            let cleared = !reset;
             do {
                 result = await fetchProducts(this.userID, this.cursor);
                 if (!result.success) {
-                    showNotification(`Failed to display products: ${result.error} `, 'error');
-                    this.loadMoreButton.disabled = false;
+                    if (!cleared || !this.container.querySelector(".product_card")) this.displayError();
+                    showNotification(`Failed to display products: ${result.error}`, 'error');
+                    this.finishLoading();
                     return;
+                }
+                if (!cleared) {
+                    this.container.replaceChildren();
+                    cleared = true;
                 }
                 this.cursor = result.cursor;
                 this.displayallProducts(result.products);
@@ -432,102 +475,79 @@ export class getallProducts {
             } while (shown === 0 && result.hasMore);
 
             if (!this.container.querySelector(".product_card")) {
-                this.container.innerHTML = "<p>No available products found.</p>";
+                this.displayEmpty();
             }
             this.loadMoreButton.hidden = !result.hasMore;
         } catch (error) {
             console.error("Failed to fetch products: ", error);
-            showNotification("Fetching products failed.", 'error');
+            if (!this.container.querySelector(".product_card")) this.displayError();
+            showNotification("Loading listings failed. Please try again.", 'error');
         }
 
+        this.finishLoading();
+    }
+
+    finishLoading() {
         this.loadMoreButton.disabled = false;
+        this.loadMoreButton.removeAttribute('aria-busy');
+        this.container.removeAttribute('aria-busy');
+    }
+
+    displayEmpty() {
+        this.container.replaceChildren(createEmptyState({
+            iconName: 'fa-store',
+            title: 'No listings yet',
+            text: "Nothing from other students is for sale right now. Check back soon, or list something yourself.",
+            action: linkButton('create_auction.html', 'Sell an item'),
+        }));
+    }
+
+    displayError() {
+        const retry = el('button', 'btn btn-secondary', 'Try again');
+        retry.type = 'button';
+        retry.addEventListener('click', () => this.fetchAllproducts(this.userID));
+        this.container.replaceChildren(createEmptyState({
+            iconName: 'fa-wifi',
+            title: "We couldn't load listings",
+            text: 'Check your connection and try again.',
+            action: retry,
+            isError: true,
+        }));
     }
 
     displayallProducts(products) {
-
         products.forEach(data => {
-            const product_card = document.createElement("div");
-            product_card.classList.add("product_card");
+            const name = data.name || 'Untitled listing';
+            const card = el('article', 'product_card');
 
-            const img_div = document.createElement("div");
-            img_div.classList.add("img_div");
+            const media = el('div', 'card-media');
+            const img = el('img');
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            img.width = 400;
+            img.height = 300;
+            setListingImage(img, data.image, name);
+            media.append(img);
 
-            const img = document.createElement("img");
-            img.src = data.image?.trim() || "Images/11.png";
-            img.alt = data.name || "Product Image";
+            const body = el('div', 'card-body');
 
-            //    img_div.appendChild(img);
-            img_div.style.setProperty('--bg-image', `url('${img.src}')`);
-            product_card.appendChild(img_div);
+            const title = el('h3', 'card-title');
+            const link = el('a', 'card-link', name);
+            linkToListing(link, data);
+            title.append(link);
 
-            const products_info_div = document.createElement("div");
-            products_info_div.classList.add("products_info_div");
+            const price = el('p', 'card-price', priceText(data.price));
 
-            const info_product = document.createElement("div");
-            info_product.classList.add("info_product");
+            const meta = el('p', 'card-meta');
+            if (data.condition) meta.append(el('span', 'badge', conditionLabel(data.condition)));
+            const category = categoryLabel(data.categories);
+            if (category) meta.append(el('span', 'small muted', category));
 
-            const name = document.createElement("span");
-            const name_text = document.createElement("strong");
-            name_text.textContent = data.name || "No Name Available";
-            name.appendChild(name_text);
-            info_product.appendChild(name);
+            const seller = el('p', 'card-seller', `Listed by ${data.soldBy_name || 'a student'}`);
 
-            const listing_rank = document.createElement("span");
-            let stars = 0;
-
-            switch (data.condition) {
-                case ("New"):
-                    stars = 5;
-                    break;
-                case ("Like New"):
-                    stars = 4;
-                    break;
-                case ("Fairly Good"):
-                    stars = 3;
-                    break;
-                case ("Used"):
-                    stars = 2;
-                    break;
-                case ("Heavily Used"):
-                    stars = 1;
-                    break;
-                default:
-                    stars = 0
-
-            };
-
-            for (let i = 0; i < 5; i++) {
-                const icon = document.createElement("i");
-                icon.classList.add("far", "fa-star");
-                if (i < stars) {
-                    icon.classList.add("fas", "fa-star");
-                    icon.style.color = "#e7b33f";
-                }
-                listing_rank.appendChild(icon);
-            }
-            info_product.appendChild(listing_rank);
-
-            const price = document.createElement("span");
-            price.textContent = ` €‎ ${formatPrice(data.price)} `;
-            price.style.color = "#2f2f2f";
-            info_product.appendChild(price);
-
-            const cta_buy_now = document.createElement("button");
-            cta_buy_now.innerHTML = ' Buy';
-            cta_buy_now.id = "buy_now";
-
-            products_info_div.append(info_product, cta_buy_now);
-            product_card.append(products_info_div);
-
-            product_card.addEventListener("click", () => {
-                sessionStorage.setItem("selected_item", JSON.stringify(data));
-                window.location.href = "product_listing_page.html";
-            });
-
-            this.container.appendChild(product_card);
-        })
+            body.append(title, price, meta, seller);
+            card.append(media, body);
+            this.container.appendChild(card);
+        });
     }
-
-
-};
-
+}

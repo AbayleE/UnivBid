@@ -13,4 +13,8 @@ const firebaseApp = initializeApp({
 
 export const adminAuth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);
+// REST instead of gRPC shortens cold starts on Cloud Run; the API cannot
+// use realtime listeners, so nothing is lost.
+db.settings({ preferRest: true });
+
 export const stripe = new Stripe(env.stripeSecretKey);

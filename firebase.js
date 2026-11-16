@@ -8,8 +8,8 @@ import {
   browserLocalPersistence,
   signOut,
   deleteUser,
+  sendEmailVerification,
 } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
 import {
   getFirestore,
   setDoc,
@@ -44,7 +44,6 @@ const fallbackConfig = {
 export const firebaseConfig = window.UniBidConfig || fallbackConfig;
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -57,11 +56,11 @@ const db = getFirestore(app);
 })();
 
 export {
-  analytics,
   auth,
   db,
   signOut,
   deleteUser,
+  sendEmailVerification,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,

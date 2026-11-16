@@ -159,6 +159,41 @@ export const fetchProducts = async (UserID, cursor = null) => {
   }
 };
 
+// One listing by id, for shareable links. Returns product: null when it
+// does not exist. The rules still require a signed-in viewer.
+export const fetchProductById = async (pid) => {
+  try {
+    if (typeof pid !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(pid)) {
+      return { success: true, product: null };
+    }
+    const snapshot = await getDoc(doc(db, "products", pid));
+    return { success: true, product: snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null };
+  } catch (error) {
+    console.error("Failed to load the listing:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+// Counted by Firestore, so the dashboard does not download every listing to
+// count the active ones.
+export const countActiveListings = async () => {
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No authenticated user");
+
+    const active_query = query(
+      collection(db, "products"),
+      where("soldBy", "==", user.uid),
+      where("status", "==", "Available")
+    );
+    const totals = (await getAggregateFromServer(active_query, { active: count() })).data();
+    return { success: true, active: totals.active };
+  } catch (error) {
+    console.error("Failed to count listings:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 // Totals are computed by Firestore, so no order documents are downloaded.
 export const fetchSellerSales = async () => {
   try {

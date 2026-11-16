@@ -3,6 +3,7 @@ import {
     db,
     signOut,
     deleteUser,
+    sendEmailVerification,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     onAuthStateChanged,
@@ -73,6 +74,13 @@ export const registerUser = async (
 
         const docRef = doc(db, "users", user.uid);
         await setDoc(docRef, userData);
+        // Verification is advisory for now. Once every account has verified,
+        // the Firestore rules can require email_verified to create listings.
+        try {
+            await sendEmailVerification(user);
+        } catch (error) {
+            console.error("Could not send the verification email:", error.message);
+        }
         return { success: true, user };
     } catch (error) {
         console.error("Error creating user:", error.message);
@@ -105,3 +113,16 @@ export const signinUser = async (email, password) => {
     }
 };
 
+
+// Where to go after signing in. Only a relative page on this site is
+// accepted, so a crafted link cannot send people elsewhere.
+export const safeNext = (value, fallback = "dashboard.html") => {
+    if (typeof value !== "string" || !/^[A-Za-z0-9_]+\.html(\?[A-Za-z0-9_=&%.-]*)?$/.test(value)) return fallback;
+    return value;
+};
+
+// Builds the sign-in link that returns to the current page.
+export const signInUrl = () => {
+    const here = window.location.pathname.split("/").pop() + window.location.search;
+    return `sign_in.html?next=${encodeURIComponent(here)}`;
+};
